@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 
 
@@ -7,6 +9,7 @@ def preprocess_business_metadata(input_file='data/processed/business_processed.c
     # Example: split categories if stored as a comma-separated string
     if 'categories' in df.columns:
         df['categories_list'] = df['categories'].apply(lambda x: x.split(',') if isinstance(x, str) else [])
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     df.to_csv(output_file, index=False)
     print(f"Business metadata processed and saved to {output_file}")
     return df
