@@ -15,25 +15,23 @@ def run_preprocessing():
     # Check if processed files exist; if not, run preprocessing
     processed_files = ["data/processed/ratings_processed.csv",
                        "data/processed/reviews_processed.csv",
-                       "data/processed/business_metadata.csv"]
+                       "data/processed/business_processed.csv"]
     missing_files = [f for f in processed_files if not os.path.exists(f)]
 
     if missing_files:
         print("Processed files missing. Running preprocessing steps...")
         from common.data_preprocessing import preprocess_ratings, preprocess_reviews, preprocess_business
-        from common.metadata_preprocessing import preprocess_business_metadata
 
         preprocess_ratings()
         preprocess_reviews()
         preprocess_business()
-        preprocess_business_metadata()
     else:
         print("All processed files found. Skipping preprocessing.")
 
 
 def run_content_based(business_id=None, top_n=5):
     # Load preprocessed business metadata and reviews
-    business_df = pd.read_csv("data/processed/business_metadata.csv")
+    business_df = pd.read_csv("data/processed/business_processed.csv")
     reviews_df = pd.read_csv("data/processed/reviews_processed.csv")
 
     if business_id is None:
