@@ -276,6 +276,23 @@ def preprocess_business(input_csv="data/raw/csv/business.csv", output_csv="data/
     return df
 
 
+def clean_user(df):
+    """
+    Drop rows missing critical fields like user_id or name.
+    """
+    df = df.dropna(subset=["user_id", "name"])
+    return df
+
+
+def preprocess_user(input_csv="data/raw/csv/user.csv", output_csv="data/processed/user_processed.csv"):
+    df = pd.read_csv(input_csv)
+    df = clean_user(df)
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    df.to_csv(output_csv, index=False)
+    print(f"Processed user data saved to {output_csv}")
+    return df
+
+
 def clean_checkin(df):
     """
     Drop rows missing critical fields like business_id or date.
@@ -340,6 +357,12 @@ if __name__ == "__main__":
         preprocess_ratings()
     else:
         print("Processed ratings data already exists. Skipping cleaning.")
+
+    if not os.path.exists("data/processed/user_processed.csv"):
+        print("Cleaning and processing user data...")
+        preprocess_user()
+    else:
+        print("Processed user data already exists. Skipping cleaning.")
 
     if not os.path.exists("data/processed/checkin_processed.csv"):
         print("Cleaning and processing checkin data...")
