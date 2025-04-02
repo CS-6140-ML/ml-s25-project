@@ -1,9 +1,11 @@
 import numpy as np
+import torch
 from sentence_transformers import SentenceTransformer
 
 from .cache import cache_results
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
 
 
 @cache_results("/data/cache/embeddings_cache.pkl", force_recompute=False)

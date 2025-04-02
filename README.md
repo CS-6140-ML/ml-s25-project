@@ -7,7 +7,7 @@ This project is part of `CS 6140 - Machine Learning` for Spring 2025 and aims to
 ## Project Structure
 
 ```
-s25-project/
+ml-s25-project/
 ├── data/
 │   ├── raw/                  # Original Yelp data (ratings.csv, reviews.csv, business.csv)
 │   └── processed/            # Cleaned/processed files
