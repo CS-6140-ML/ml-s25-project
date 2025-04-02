@@ -276,8 +276,17 @@ def preprocess_business(input_csv="data/raw/csv/business.csv", output_csv="data/
     return df
 
 
+def clean_checkin(df):
+    """
+    Drop rows missing critical fields like business_id or date.
+    """
+    df = df.dropna(subset=["business_id", "date"])
+    return df
+
+
 def preprocess_checkin(input_csv="data/raw/csv/checkin.csv", output_csv="data/processed/checkin_processed.csv"):
     df = pd.read_csv(input_csv)
+    df = clean_checkin(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     df.to_csv(output_csv, index=False)
     print(f"Processed checkin data saved to {output_csv}")
@@ -333,7 +342,7 @@ if __name__ == "__main__":
         print("Processed ratings data already exists. Skipping cleaning.")
 
     if not os.path.exists("data/processed/checkin_processed.csv"):
-        print("Processing checkin data (cleaning not applied)...")
+        print("Cleaning and processing checkin data...")
         preprocess_checkin()
     else:
         print("Processed checkin data already exists. Skipping cleaning.")
