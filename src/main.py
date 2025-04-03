@@ -153,8 +153,8 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hybrid Yelp Recommendation System - Main Integration")
-    parser.add_argument('--method', type=str, required=True, choices=['content', 'collab', 'svd'],
-                        help="Select the recommendation method: 'content' for Content-Based, 'collab' for Collaborative Filtering, 'svd' for Matrix Factorization")
+    parser.add_argument('--method', type=str, required=True, choices=['content', 'cf', 'svd'],
+                        help="Select the recommendation method: 'content' for Content-Based, 'cf' for Collaborative Filtering, 'svd' for Matrix Factorization")
     parser.add_argument('--id', type=str, required=False,
                         help="ID of the business (for content-based) or user (for collab/svd). Defaults to the first record if not provided.")
     parser.add_argument('--top_n', type=int, default=5,
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     if args.method == "content":
         run_content_based(business_id=args.id, top_n=args.top_n)
-    elif args.method == "collab":
+    elif args.method == "cf":
         run_collaborative(user_id=args.id, top_n=args.top_n)
     elif args.method == "svd":
         run_matrix_factorization(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors)
