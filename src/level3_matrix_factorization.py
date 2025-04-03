@@ -15,7 +15,7 @@ def build_user_item_matrix(ratings_df):
     return ratings_df.pivot(index='user_id', columns='business_id', values='rating')
 
 
-@cache_results(os.path.join(CACHE_DIR, "svd_model_cache.pkl"), force_recompute=False)
+@cache_results("svd_model_cache.pkl", force_recompute=False)
 def train_svd(user_item_matrix, n_factors=20):
     """
     Train SVD on the user-item matrix and cache the model and its factors.

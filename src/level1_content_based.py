@@ -11,7 +11,7 @@ from common.text_embeddings import compute_embeddings
 from util.paths import CACHE_DIR, DATA_PROCESSED
 
 
-@cache_results(os.path.join(CACHE_DIR, "item_profiles_cache.pkl"), force_recompute=False)
+@cache_results("item_profiles_cache.pkl", force_recompute=False)
 def build_item_profiles(business_df, reviews_df):
     """
     Build content-based item profiles by aggregating review texts, computing text embeddings,

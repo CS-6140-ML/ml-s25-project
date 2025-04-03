@@ -12,7 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
 
 
-@cache_results(os.path.join(CACHE_DIR, "embeddings_cache.pkl"), force_recompute=False)
+@cache_results("embeddings_cache.pkl", force_recompute=False)
 def compute_embeddings(texts):
     """
     Compute and cache embeddings for a list of texts.

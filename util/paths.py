@@ -9,6 +9,7 @@ DATA_RAW_CSV = os.path.join(BASE_DIR, "data", "raw", "csv")
 DATA_PROCESSED = os.path.join(BASE_DIR, "data", "processed")
 TEST_DATA_PROCESSED = os.path.join(DATA_PROCESSED, "test")
 CACHE_DIR = os.path.join(BASE_DIR, "data", "cache")
+TEST_CACHE_DIR = os.path.join(CACHE_DIR, "test")
 
 if __name__ == "__main__":
     print(f"Base directory: {BASE_DIR}")
@@ -17,3 +18,4 @@ if __name__ == "__main__":
     print(f"Processed data path: {DATA_PROCESSED}")
     print(f"Processed test data path: {TEST_DATA_PROCESSED}")
     print(f"Cache directory: {CACHE_DIR}")
+    print(f"Test Cache directory: {TEST_CACHE_DIR}")
