@@ -29,7 +29,6 @@ def build_item_profiles(business_df, reviews_df):
 
     # Compute text embeddings
     embeddings = compute_embeddings(merged_df['review_text'].tolist())
-    print("Embeddings shape:", embeddings.shape)
 
     # Calculate sentiment scores (cached)
     business_sentiments = calculate_business_sentiments(reviews_df)
@@ -63,37 +62,29 @@ def calculate_business_sentiments(reviews_df):
     # Extract polarities using vectorized operations instead of apply
     polarities = [sentiment[0] for sentiment in sentiments]
 
-    print("Sentiments shape:", sentiments.shape)
-
     # Create a temporary DataFrame for group-by operation
     sentiment_df = pd.DataFrame({
         'business_id': reviews_df['business_id'],
         'polarity': polarities
     })
 
-    print("Sentiment DataFrame shape:", sentiment_df.shape)
-
     # Compute average sentiment using optimized group-by
     avg_sentiments = sentiment_df.groupby('business_id')['polarity'].mean().reset_index()
     avg_sentiments.rename(columns={'polarity': 'avg_sentiment'}, inplace=True)
-    print("Average Sentiments shape:", avg_sentiments.shape)
 
     toc = time.time()
     minutes = (toc - tic) // 60
     seconds = (toc - tic) % 60
-    print(f"Sentiment calculation took {minutes} and {seconds} seconds.")
+    print(f"Sentiment calculation took {minutes} minutes {seconds} seconds.")
     return avg_sentiments
 
 
 def recommend_similar_businesses(business_id, item_profiles, top_n=5):
     """
     Recommend similar businesses based on cosine similarity between item profiles.
+    Memory-efficient implementation that only computes similarities for the target business.
     """
     business_ids = list(item_profiles.keys())
-    feature_matrix = np.array([item_profiles[b] for b in business_ids])
-
-    # Compute cosine similarity matrix
-    sim_matrix = cosine_similarity(feature_matrix)
 
     try:
         idx = business_ids.index(business_id)
@@ -101,12 +92,21 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
         print("Business ID not found in profiles.")
         return []
 
-    sim_scores = sim_matrix[idx]
-    sim_scores[idx] = 0  # Exclude self from recommendations
+    # Get the feature vector for the target business
+    target_vector = item_profiles[business_id].reshape(1, -1)
 
+    # Create array of all other business vectors
+    other_business_ids = [bid for bid in business_ids if bid != business_id]
+    other_vectors = np.array([item_profiles[bid] for bid in other_business_ids])
+
+    # Compute similarity only between target and all others (not all-to-all)
+    sim_scores = cosine_similarity(target_vector, other_vectors)[0]
+
+    # Get indices of top similar businesses
     top_indices = np.argsort(sim_scores)[::-1][:top_n]
-    recommended_ids = [business_ids[i] for i in top_indices]
-    return recommended_ids
+
+    # Return top business IDs
+    return [other_business_ids[i] for i in top_indices]
 
 
 if __name__ == "__main__":

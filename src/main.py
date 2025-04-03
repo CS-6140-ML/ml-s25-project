@@ -51,7 +51,25 @@ def run_content_based(business_id=None, top_n=5):
     print("Building item profiles using Content-Based Filtering...")
     profiles = l1.build_item_profiles(business_df, reviews_df)
     recommendations = l1.recommend_similar_businesses(business_id, profiles, top_n=top_n)
-    print(f"Content-Based Recommendations for business '{business_id}': {recommendations}")
+
+    # Get business names for better readability
+    business_csv = os.path.join(processed_dir, "business_processed.csv")
+    business_df = pd.read_csv(business_csv)
+
+    # Get user's name
+    business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
+        business_df['business_id'] == business_id].empty else "Unknown"
+
+    # Get business names for recommendations
+    business_names = []
+    for business_id in recommendations:
+        business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
+            business_df['business_id'] == business_id].empty else "Unknown"
+        business_names.append(f"{business_name}")
+
+    print(f"Content-Based Filtering Recommendations for business '{business_name}':")
+    for i, name in enumerate(business_names, 1):
+        print(f"{i}. {name}")
 
 
 def run_collaborative(user_id=None, top_n=5):
@@ -85,9 +103,9 @@ def run_collaborative(user_id=None, top_n=5):
     for business_id in recommendations:
         business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
             business_df['business_id'] == business_id].empty else "Unknown"
-        business_names.append(f"{business_name} ({business_id})")
+        business_names.append(f"{business_name}")
 
-    print(f"Collaborative Filtering Recommendations for user '{user_name}' ({user_id}):")
+    print(f"Collaborative Filtering Recommendations for user '{user_name}':")
     for i, name in enumerate(business_names, 1):
         print(f"{i}. {name}")
 
@@ -126,9 +144,9 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
     for business_id in recommendations:
         business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
             business_df['business_id'] == business_id].empty else "Unknown"
-        business_names.append(f"{business_name} ({business_id})")
+        business_names.append(f"{business_name}")
 
-    print(f"Collaborative Filtering Recommendations for user '{user_name}' ({user_id}):")
+    print(f"Matrix Factorization (SVD) Recommendations for user '{user_name}':")
     for i, name in enumerate(business_names, 1):
         print(f"{i}. {name}")
 
