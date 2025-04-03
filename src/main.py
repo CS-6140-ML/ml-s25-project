@@ -9,11 +9,12 @@ import src.level1_content_based as l1
 import src.level2_cf as l2
 # Import Level 3: Matrix Factorization functions
 import src.level3_matrix_factorization as l3
+from src.common.data_preprocessing import preprocess_data
 from src.common.user_item_matrix_components import build_user_item_matrix_components
 from util.paths import DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
 
 
-def run_preprocessing():
+def run_preprocessing(test_mode=False):
     # Check if processed files exist; if not, run preprocessing
     business_csv = os.path.join(processed_data_path, "business_processed.csv")
     ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
@@ -24,14 +25,7 @@ def run_preprocessing():
 
     if missing_files:
         print("Processed files missing. Running preprocessing steps...")
-        from src.common.data_preprocessing import preprocess_ratings, preprocess_reviews, preprocess_business, \
-            preprocess_checkin, preprocess_user
-
-        preprocess_business()
-        preprocess_reviews()
-        preprocess_ratings()
-        preprocess_user()
-        preprocess_checkin()
+        preprocess_data(test_mode)
     else:
         print("All processed files found. Skipping preprocessing.")
 
@@ -172,7 +166,7 @@ if __name__ == "__main__":
     processed_data_path = TEST_DATA_PROCESSED_PATH if args.testing else DATA_PROCESSED_PATH
 
     # Run preprocessing before executing any recommendations
-    run_preprocessing()
+    run_preprocessing(args.testing)
 
     if args.method == "content":
         run_content_based(business_id=args.id, top_n=args.top_n)
