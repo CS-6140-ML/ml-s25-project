@@ -351,17 +351,7 @@ def subsample_processed_data(percent=5):
     print(f" - Checkins: {checkin_sub_file}")
 
 
-##############################################
-# Main Execution with Testing Flag
-##############################################
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Data Preprocessing Pipeline")
-    parser.add_argument('--testing', type=bool, default=False,
-                        help="Set to True to create test (5% subsample) files in TEST_DATA_PROCESSED folder")
-    args = parser.parse_args()
-
+def preprocess_data(test_mode=False):
     # Check and convert JSON files to CSV in data/raw/csv if needed
     if not os.path.exists(os.path.join(DATA_RAW_CSV_PATH, "business.csv")):
         print("Converting business JSON to CSV...")
@@ -419,6 +409,20 @@ if __name__ == "__main__":
     else:
         print("Processed checkin data already exists. Skipping cleaning.")
 
-    if args.testing:
+    if test_mode:
         print("Subsampling processed data to 5% for testing...")
         subsample_processed_data(percent=5)
+
+
+##############################################
+# Main Execution with Testing Flag
+##############################################
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Data Preprocessing Pipeline")
+    parser.add_argument('--testing', type=bool, default=False,
+                        help="Set to True to create test (5% subsample) files in TEST_DATA_PROCESSED folder")
+    args = parser.parse_args()
+
+    preprocess_data(args.testing)
