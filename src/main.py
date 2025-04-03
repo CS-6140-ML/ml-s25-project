@@ -1,6 +1,5 @@
 import argparse
 import os
-
 import pandas as pd
 
 # Import Level 1: Content-Based Filtering functions
@@ -9,33 +8,36 @@ import level1_content_based as l1
 import level2_cf as l2
 # Import Level 3: Matrix Factorization functions
 import level3_matrix_factorization as l3
-from util.paths import DATA_PROCESSED
+from util.paths import DATA_PROCESSED, TEST_DATA_PROCESSED
 
 
 def run_preprocessing():
     # Check if processed files exist; if not, run preprocessing
-    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
-    ratings_csv = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
-    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+    business_csv = os.path.join(processed_dir, "business_processed.csv")
+    ratings_csv = os.path.join(processed_dir, "ratings_processed.csv")
+    reviews_csv = os.path.join(processed_dir, "reviews_processed.csv")
 
     processed_files = [business_csv, ratings_csv, reviews_csv]
     missing_files = [f for f in processed_files if not os.path.exists(f)]
 
     if missing_files:
         print("Processed files missing. Running preprocessing steps...")
-        from common.data_preprocessing import preprocess_ratings, preprocess_reviews, preprocess_business
+        from common.data_preprocessing import preprocess_ratings, preprocess_reviews, preprocess_business, \
+            preprocess_checkin, preprocess_user
 
-        preprocess_ratings()
-        preprocess_reviews()
         preprocess_business()
+        preprocess_reviews()
+        preprocess_ratings()
+        preprocess_user()
+        preprocess_checkin()
     else:
         print("All processed files found. Skipping preprocessing.")
 
 
 def run_content_based(business_id=None, top_n=5):
     # Load preprocessed business metadata and reviews
-    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
-    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+    business_csv = os.path.join(processed_dir, "business_processed.csv")
+    reviews_csv = os.path.join(processed_dir, "reviews_processed.csv")
 
     business_df = pd.read_csv(business_csv)
     reviews_df = pd.read_csv(reviews_csv)
@@ -52,7 +54,7 @@ def run_content_based(business_id=None, top_n=5):
 
 def run_collaborative(user_id=None, top_n=5):
     # Load preprocessed ratings
-    ratings_csv = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
+    ratings_csv = os.path.join(processed_dir, "ratings_processed.csv")
 
     ratings_df = pd.read_csv(ratings_csv)
     user_item_matrix = l2.build_user_item_matrix(ratings_df)
@@ -68,7 +70,7 @@ def run_collaborative(user_id=None, top_n=5):
 
 def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
     # Load preprocessed ratings
-    ratings_csv = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
+    ratings_csv = os.path.join(processed_dir, "ratings_processed.csv")
 
     ratings_df = pd.read_csv(ratings_csv)
     user_item_matrix = l3.build_user_item_matrix(ratings_df)
@@ -84,31 +86,24 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Hybrid Yelp Recommendation System - Main Integration")
+    parser.add_argument('--method', type=str, required=True, choices=['content', 'collab', 'svd'],
+                        help="Select the recommendation method: 'content' for Content-Based, 'collab' for Collaborative Filtering, 'svd' for Matrix Factorization")
+    parser.add_argument('--id', type=str, required=False,
+                        help="ID of the business (for content-based) or user (for collab/svd). Defaults to the first record if not provided.")
+    parser.add_argument('--top_n', type=int, default=5,
+                        help="Number of recommendations to return (default is 5).")
+    parser.add_argument('--n_factors', type=int, default=20,
+                        help="Number of latent factors for SVD in matrix factorization (default is 20).")
+    parser.add_argument('--testing', type=bool, default=False,
+                        help="Set to True to use test (5% subsample) data.")
+    args = parser.parse_args()
+
+    # Determine the processed directory based on testing flag.
+    processed_dir = TEST_DATA_PROCESSED if args.testing else DATA_PROCESSED
+
     # Run preprocessing before executing any recommendations
     run_preprocessing()
-
-    # Set up command-line argument parsing
-    parser = argparse.ArgumentParser(
-        description="Hybrid Yelp Recommendation System - Main Integration"
-    )
-    parser.add_argument(
-        '--method', type=str, required=True, choices=['content', 'collab', 'svd'],
-        help="Select the recommendation method: 'content' for Content-Based, 'collab' for Collaborative Filtering, 'svd' for Matrix Factorization"
-    )
-    parser.add_argument(
-        '--id', type=str, required=False,
-        help="ID of the business (for content-based) or user (for collab/svd). Defaults to the first record if not provided."
-    )
-    parser.add_argument(
-        '--top_n', type=int, default=5,
-        help="Number of recommendations to return (default is 5)."
-    )
-    parser.add_argument(
-        '--n_factors', type=int, default=20,
-        help="Number of latent factors to use for SVD in matrix factorization (default is 20)."
-    )
-
-    args = parser.parse_args()
 
     if args.method == "content":
         run_content_based(business_id=args.id, top_n=args.top_n)

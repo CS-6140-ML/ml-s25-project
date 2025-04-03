@@ -1,10 +1,8 @@
 import csv
 import json
 import os
-
 import pandas as pd
-
-from util.paths import DATA_RAW_JSON, DATA_RAW_CSV, DATA_PROCESSED
+from util.paths import DATA_RAW_JSON, DATA_RAW_CSV, DATA_PROCESSED, TEST_DATA_PROCESSED
 
 
 ##############################################
@@ -317,9 +315,22 @@ def preprocess_checkin(input_csv=os.path.join(DATA_RAW_CSV, "checkin.csv"),
 
 
 ##############################################
-# Main Execution
+# Main Execution with Testing Flag
 ##############################################
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Data Preprocessing Pipeline")
+    parser.add_argument('--testing', type=bool, default=False,
+                        help="Set to True to create test files in data/processed/test/")
+    args = parser.parse_args()
+
+    # Determine output directory based on testing flag
+    processed_dir = TEST_DATA_PROCESSED if args.testing else DATA_PROCESSED
+
+    # Ensure processed directory exists
+    os.makedirs(processed_dir, exist_ok=True)
+
     # Check and convert JSON files to CSV in data/raw/csv if needed
     if not os.path.exists(os.path.join(DATA_RAW_CSV, "business.csv")):
         print("Converting business JSON to CSV...")
@@ -347,32 +358,37 @@ if __name__ == "__main__":
         print("Checkin CSV already exists. Skipping conversion.")
 
     # Check and clean/process CSV files into data/processed if needed
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "business_processed.csv")):
+    if not os.path.exists(os.path.join(processed_dir, "business_processed.csv")):
         print("Cleaning and processing business data...")
-        preprocess_business()
+        preprocess_business(input_csv=os.path.join(DATA_RAW_CSV, "business.csv"),
+                            output_csv=os.path.join(processed_dir, "business_processed.csv"))
     else:
         print("Processed business data already exists. Skipping cleaning.")
 
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "reviews_processed.csv")):
+    if not os.path.exists(os.path.join(processed_dir, "reviews_processed.csv")):
         print("Cleaning and processing reviews data...")
-        preprocess_reviews()
+        preprocess_reviews(input_csv=os.path.join(DATA_RAW_CSV, "reviews.csv"),
+                           output_csv=os.path.join(processed_dir, "reviews_processed.csv"))
     else:
         print("Processed reviews data already exists. Skipping cleaning.")
 
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "ratings_processed.csv")):
+    if not os.path.exists(os.path.join(processed_dir, "ratings_processed.csv")):
         print("Cleaning and processing ratings data...")
-        preprocess_ratings()
+        preprocess_ratings(input_csv=os.path.join(DATA_RAW_CSV, "ratings.csv"),
+                           output_csv=os.path.join(processed_dir, "ratings_processed.csv"))
     else:
         print("Processed ratings data already exists. Skipping cleaning.")
 
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "user_processed.csv")):
+    if not os.path.exists(os.path.join(processed_dir, "user_processed.csv")):
         print("Cleaning and processing user data...")
-        preprocess_user()
+        preprocess_user(input_csv=os.path.join(DATA_RAW_CSV, "user.csv"),
+                        output_csv=os.path.join(processed_dir, "user_processed.csv"))
     else:
         print("Processed user data already exists. Skipping cleaning.")
 
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "checkin_processed.csv")):
+    if not os.path.exists(os.path.join(processed_dir, "checkin_processed.csv")):
         print("Cleaning and processing checkin data...")
-        preprocess_checkin()
+        preprocess_checkin(input_csv=os.path.join(DATA_RAW_CSV, "checkin.csv"),
+                           output_csv=os.path.join(processed_dir, "checkin_processed.csv"))
     else:
         print("Processed checkin data already exists. Skipping cleaning.")
