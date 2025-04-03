@@ -6,30 +6,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 def build_user_item_matrix(ratings_df):
     """
     Build a user-item matrix from the ratings dataframe.
-
-    Parameters:
-        ratings_df (pd.DataFrame): Should contain 'user_id', 'business_id', and 'rating'.
-
-    Returns:
-        pd.DataFrame: Pivot table with users as rows and businesses as columns.
     """
-    user_item_matrix = ratings_df.pivot(index='user_id', columns='business_id', values='rating')
-    return user_item_matrix
+    return ratings_df.pivot(index='user_id', columns='business_id', values='rating')
 
 
 def user_based_recommendations(user_id, user_item_matrix, top_n=5):
     """
-    Recommend items to a user using user-based collaborative filtering.
-
-    For each unrated item, a weighted average rating is computed from similar users.
-
-    Parameters:
-        user_id: The target user.
-        user_item_matrix: Pivot table of user ratings.
-        top_n: Number of recommendations to return.
-
-    Returns:
-        list: List of recommended business_ids.
+    Recommend items for a user using user-based collaborative filtering.
+    For each unrated item, predict a rating using a weighted average of similar users' ratings.
     """
     # Fill NaNs with 0 for similarity computation
     matrix_filled = user_item_matrix.fillna(0)
@@ -64,12 +48,14 @@ def user_based_recommendations(user_id, user_item_matrix, top_n=5):
 
 
 if __name__ == "__main__":
-    # Load ratings data (assumes preprocessed ratings file exists)
-    ratings_df = pd.read_csv("data/processed/ratings_processed.csv")
+    from util.paths import DATA_PROCESSED
+
+    ratings_csv = DATA_PROCESSED + "/ratings_processed.csv"
+    ratings_df = pd.read_csv(ratings_csv)
     user_item_matrix = build_user_item_matrix(ratings_df)
 
     # Pick a sample user_id from the ratings data
     sample_user_id = user_item_matrix.index[0]
-    print(f"Recommendations for user {sample_user_id}:")
     recs = user_based_recommendations(sample_user_id, user_item_matrix, top_n=5)
+    print(f"Collaborative Filtering Recommendations for user {sample_user_id}:")
     print(recs)

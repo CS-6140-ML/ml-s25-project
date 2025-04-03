@@ -9,13 +9,16 @@ import level1_content_based as l1
 import level2_cf as l2
 # Import Level 3: Matrix Factorization functions
 import level3_matrix_factorization as l3
+from util.paths import DATA_PROCESSED
 
 
 def run_preprocessing():
     # Check if processed files exist; if not, run preprocessing
-    processed_files = ["data/processed/ratings_processed.csv",
-                       "data/processed/reviews_processed.csv",
-                       "data/processed/business_processed.csv"]
+    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
+    ratings_csv = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
+    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+
+    processed_files = [business_csv, ratings_csv, reviews_csv]
     missing_files = [f for f in processed_files if not os.path.exists(f)]
 
     if missing_files:
@@ -31,8 +34,11 @@ def run_preprocessing():
 
 def run_content_based(business_id=None, top_n=5):
     # Load preprocessed business metadata and reviews
-    business_df = pd.read_csv("data/processed/business_processed.csv")
-    reviews_df = pd.read_csv("data/processed/reviews_processed.csv")
+    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
+    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+
+    business_df = pd.read_csv(business_csv)
+    reviews_df = pd.read_csv(reviews_csv)
 
     if business_id is None:
         business_id = business_df['business_id'].iloc[0]
@@ -46,7 +52,9 @@ def run_content_based(business_id=None, top_n=5):
 
 def run_collaborative(user_id=None, top_n=5):
     # Load preprocessed ratings
-    ratings_df = pd.read_csv("data/processed/ratings_processed.csv")
+    ratings_csv = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
+
+    ratings_df = pd.read_csv(ratings_csv)
     user_item_matrix = l2.build_user_item_matrix(ratings_df)
 
     if user_id is None:
@@ -60,7 +68,9 @@ def run_collaborative(user_id=None, top_n=5):
 
 def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
     # Load preprocessed ratings
-    ratings_df = pd.read_csv("data/processed/ratings_processed.csv")
+    ratings_csv = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
+
+    ratings_df = pd.read_csv(ratings_csv)
     user_item_matrix = l3.build_user_item_matrix(ratings_df)
 
     if user_id is None:

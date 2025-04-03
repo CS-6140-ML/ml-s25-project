@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
@@ -5,9 +7,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 from common.cache import cache_results
 from common.sentiment_analysis import batch_sentiment_analysis
 from common.text_embeddings import compute_embeddings
+# Import centralized paths and common modules
+from util.paths import CACHE_DIR, DATA_PROCESSED
 
 
-@cache_results("/data/cache/item_profiles_cache.pkl", force_recompute=False)
+@cache_results(os.path.join(CACHE_DIR, "item_profiles_cache.pkl"), force_recompute=False)
 def build_item_profiles(business_df, reviews_df):
     """
     Build content-based item profiles by aggregating review texts, computing text embeddings,
@@ -39,7 +43,7 @@ def build_item_profiles(business_df, reviews_df):
 
     merged_df['avg_sentiment'] = merged_df['business_id'].apply(avg_polarity)
 
-    # Append average sentiment as an extra feature dimension
+    # Append average sentiment as an extra feature dimension for each business
     item_profiles = {}
     for idx, row in merged_df.iterrows():
         business_id = row['business_id']
@@ -73,9 +77,11 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
 
 
 if __name__ == "__main__":
-    # Load preprocessed data (ensure these CSVs exist in data/processed)
-    business_df = pd.read_csv("data/processed/business_processed.csv")
-    reviews_df = pd.read_csv("data/processed/reviews_processed.csv")
+    # Load processed data using centralized paths
+    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
+    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+    business_df = pd.read_csv(business_csv)
+    reviews_df = pd.read_csv(reviews_csv)
 
     print("Building item profiles...")
     profiles = build_item_profiles(business_df, reviews_df)
@@ -83,5 +89,5 @@ if __name__ == "__main__":
     # Pick a sample business_id from the business dataframe
     sample_business_id = business_df['business_id'].iloc[0]
     recommendations = recommend_similar_businesses(sample_business_id, profiles, top_n=5)
-    print(f"Recommendations for business {sample_business_id}:")
+    print(f"Content-Based Recommendations for business {sample_business_id}:")
     print(recommendations)

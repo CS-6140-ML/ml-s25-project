@@ -4,6 +4,8 @@ import os
 
 import pandas as pd
 
+from util.paths import DATA_RAW_JSON, DATA_RAW_CSV, DATA_PROCESSED
+
 
 ##############################################
 # Utility: List Manipulation & Cleaning
@@ -26,8 +28,8 @@ def parse_list_field(value, separator=","):
 # Conversion Functions (JSON -> CSV)
 ##############################################
 def convert_business_json_to_csv(
-        json_path="data/raw/json/yelp_academic_dataset_business.json",
-        output_path="data/raw/csv/business.csv",
+        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_business.json"),
+        output_path=os.path.join(DATA_RAW_CSV, "business.csv"),
         chunk_size=10000
 ):
     """
@@ -75,9 +77,9 @@ def convert_business_json_to_csv(
 
 
 def convert_review_json_to_csv(
-        json_path="data/raw/json/yelp_academic_dataset_review.json",
-        reviews_output="data/raw/csv/reviews.csv",
-        ratings_output="data/raw/csv/ratings.csv",
+        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_review.json"),
+        reviews_output=os.path.join(DATA_RAW_CSV, "reviews.csv"),
+        ratings_output=os.path.join(DATA_RAW_CSV, "ratings.csv"),
         chunk_size=10000
 ):
     """
@@ -107,7 +109,6 @@ def convert_review_json_to_csv(
         ratings_chunk = []
         for line in fin:
             record = json.loads(line)
-            # Skip records missing any critical field for reviews
             if not (record.get("review_id") and record.get("user_id") and record.get("business_id")):
                 continue
             review_record = {
@@ -137,8 +138,8 @@ def convert_review_json_to_csv(
 
 
 def convert_user_json_to_csv(
-        json_path="data/raw/json/yelp_academic_dataset_user.json",
-        output_path="data/raw/csv/user.csv",
+        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_user.json"),
+        output_path=os.path.join(DATA_RAW_CSV, "user.csv"),
         chunk_size=10000
 ):
     """
@@ -180,8 +181,8 @@ def convert_user_json_to_csv(
 
 
 def convert_checkin_json_to_csv(
-        json_path="data/raw/json/yelp_academic_dataset_checkin.json",
-        output_path="data/raw/csv/checkin.csv",
+        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_checkin.json"),
+        output_path=os.path.join(DATA_RAW_CSV, "checkin.csv"),
         chunk_size=10000
 ):
     """
@@ -233,7 +234,8 @@ def clean_ratings(df):
     return df
 
 
-def preprocess_ratings(input_csv="data/raw/csv/ratings.csv", output_csv="data/processed/ratings_processed.csv"):
+def preprocess_ratings(input_csv=os.path.join(DATA_RAW_CSV, "ratings.csv"),
+                       output_csv=os.path.join(DATA_PROCESSED, "ratings_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_ratings(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -250,7 +252,8 @@ def clean_reviews(df):
     return df
 
 
-def preprocess_reviews(input_csv="data/raw/csv/reviews.csv", output_csv="data/processed/reviews_processed.csv"):
+def preprocess_reviews(input_csv=os.path.join(DATA_RAW_CSV, "reviews.csv"),
+                       output_csv=os.path.join(DATA_PROCESSED, "reviews_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_reviews(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -267,7 +270,8 @@ def clean_business(df):
     return df
 
 
-def preprocess_business(input_csv="data/raw/csv/business.csv", output_csv="data/processed/business_processed.csv"):
+def preprocess_business(input_csv=os.path.join(DATA_RAW_CSV, "business.csv"),
+                        output_csv=os.path.join(DATA_PROCESSED, "business_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_business(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -284,7 +288,8 @@ def clean_user(df):
     return df
 
 
-def preprocess_user(input_csv="data/raw/csv/user.csv", output_csv="data/processed/user_processed.csv"):
+def preprocess_user(input_csv=os.path.join(DATA_RAW_CSV, "user.csv"),
+                    output_csv=os.path.join(DATA_PROCESSED, "user_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_user(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -301,7 +306,8 @@ def clean_checkin(df):
     return df
 
 
-def preprocess_checkin(input_csv="data/raw/csv/checkin.csv", output_csv="data/processed/checkin_processed.csv"):
+def preprocess_checkin(input_csv=os.path.join(DATA_RAW_CSV, "checkin.csv"),
+                       output_csv=os.path.join(DATA_PROCESSED, "checkin_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_checkin(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -315,56 +321,57 @@ def preprocess_checkin(input_csv="data/raw/csv/checkin.csv", output_csv="data/pr
 ##############################################
 if __name__ == "__main__":
     # Check and convert JSON files to CSV in data/raw/csv if needed
-    if not os.path.exists("data/raw/csv/business.csv"):
+    if not os.path.exists(os.path.join(DATA_RAW_CSV, "business.csv")):
         print("Converting business JSON to CSV...")
         convert_business_json_to_csv()
     else:
         print("Business CSV already exists. Skipping conversion.")
 
-    if not (os.path.exists("data/raw/csv/reviews.csv") and os.path.exists("data/raw/csv/ratings.csv")):
+    if not (os.path.exists(os.path.join(DATA_RAW_CSV, "reviews.csv")) and os.path.exists(
+            os.path.join(DATA_RAW_CSV, "ratings.csv"))):
         print("Converting review JSON to CSV...")
         convert_review_json_to_csv()
     else:
         print("Review and Ratings CSV already exist. Skipping conversion.")
 
-    if not os.path.exists("data/raw/csv/user.csv"):
+    if not os.path.exists(os.path.join(DATA_RAW_CSV, "user.csv")):
         print("Converting user JSON to CSV...")
         convert_user_json_to_csv()
     else:
         print("User CSV already exists. Skipping conversion.")
 
-    if not os.path.exists("data/raw/csv/checkin.csv"):
+    if not os.path.exists(os.path.join(DATA_RAW_CSV, "checkin.csv")):
         print("Converting checkin JSON to CSV...")
         convert_checkin_json_to_csv()
     else:
         print("Checkin CSV already exists. Skipping conversion.")
 
     # Check and clean/process CSV files into data/processed if needed
-    if not os.path.exists("data/processed/business_processed.csv"):
+    if not os.path.exists(os.path.join(DATA_PROCESSED, "business_processed.csv")):
         print("Cleaning and processing business data...")
         preprocess_business()
     else:
         print("Processed business data already exists. Skipping cleaning.")
 
-    if not os.path.exists("data/processed/reviews_processed.csv"):
+    if not os.path.exists(os.path.join(DATA_PROCESSED, "reviews_processed.csv")):
         print("Cleaning and processing reviews data...")
         preprocess_reviews()
     else:
         print("Processed reviews data already exists. Skipping cleaning.")
 
-    if not os.path.exists("data/processed/ratings_processed.csv"):
+    if not os.path.exists(os.path.join(DATA_PROCESSED, "ratings_processed.csv")):
         print("Cleaning and processing ratings data...")
         preprocess_ratings()
     else:
         print("Processed ratings data already exists. Skipping cleaning.")
 
-    if not os.path.exists("data/processed/user_processed.csv"):
+    if not os.path.exists(os.path.join(DATA_PROCESSED, "user_processed.csv")):
         print("Cleaning and processing user data...")
         preprocess_user()
     else:
         print("Processed user data already exists. Skipping cleaning.")
 
-    if not os.path.exists("data/processed/checkin_processed.csv"):
+    if not os.path.exists(os.path.join(DATA_PROCESSED, "checkin_processed.csv")):
         print("Cleaning and processing checkin data...")
         preprocess_checkin()
     else:
