@@ -1,21 +1,35 @@
 import os
 
-# Calculate the base directory of the project.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Calculate the base path of the project.
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Define common paths
-DATA_RAW_JSON = os.path.join(BASE_DIR, "data", "raw", "json")
-DATA_RAW_CSV = os.path.join(BASE_DIR, "data", "raw", "csv")
-DATA_PROCESSED = os.path.join(BASE_DIR, "data", "processed")
-TEST_DATA_PROCESSED = os.path.join(DATA_PROCESSED, "test")
-CACHE_DIR = os.path.join(BASE_DIR, "data", "cache")
-TEST_CACHE_DIR = os.path.join(CACHE_DIR, "test")
+DATA_PATH = os.path.join(BASE_PATH, 'data')
+
+DATA_RAW_JSON_PATH = os.path.join(DATA_PATH, "raw", "json")
+DATA_RAW_CSV_PATH = os.path.join(DATA_PATH, "raw", "csv")
+
+DATA_PROCESSED_PATH = os.path.join(DATA_PATH, "processed")
+TEST_DATA_PROCESSED_PATH = os.path.join(DATA_PROCESSED_PATH, "test")
+
+CACHE_PATH = os.path.join(BASE_PATH, "data", "cache")
+TEST_CACHE_PATH = os.path.join(CACHE_PATH, "test")
+
+EVALUATION_PATH = os.path.join(DATA_PATH, "evaluation")
+TEST_EVALUATION_PATH = os.path.join(EVALUATION_PATH, "test")
 
 if __name__ == "__main__":
-    print(f"Base directory: {BASE_DIR}")
-    print(f"Raw JSON data path: {DATA_RAW_JSON}")
-    print(f"Raw CSV data path: {DATA_RAW_CSV}")
-    print(f"Processed data path: {DATA_PROCESSED}")
-    print(f"Processed test data path: {TEST_DATA_PROCESSED}")
-    print(f"Cache directory: {CACHE_DIR}")
-    print(f"Test Cache directory: {TEST_CACHE_DIR}")
+    print(f"Base Path: {BASE_PATH}")
+    print(f"Data Path: {DATA_PATH}")
+
+    print(f"Raw JSON Data Path: {DATA_RAW_JSON_PATH}")
+    print(f"Raw CSV Data Path: {DATA_RAW_CSV_PATH}")
+
+    print(f"Processed Data Path: {DATA_PROCESSED_PATH}")
+    print(f"Test Processed Data Path: {TEST_DATA_PROCESSED_PATH}")
+
+    print(f"Cache Path: {CACHE_PATH}")
+    print(f"Test Cache Path: {TEST_CACHE_PATH}")
+
+    print(f"Evaluation Path: {EVALUATION_PATH}")
+    print(f"Test Evaluation Path: {TEST_EVALUATION_PATH}")

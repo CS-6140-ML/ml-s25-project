@@ -10,14 +10,14 @@ import src.level2_cf as l2
 # Import Level 3: Matrix Factorization functions
 import src.level3_matrix_factorization as l3
 from src.common.user_item_matrix_components import build_user_item_matrix_components
-from util.paths import DATA_PROCESSED, TEST_DATA_PROCESSED
+from util.paths import DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
 
 
 def run_preprocessing():
     # Check if processed files exist; if not, run preprocessing
-    business_csv = os.path.join(processed_dir, "business_processed.csv")
-    ratings_csv = os.path.join(processed_dir, "ratings_processed.csv")
-    reviews_csv = os.path.join(processed_dir, "reviews_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
+    ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
+    reviews_csv = os.path.join(processed_data_path, "reviews_processed.csv")
 
     processed_files = [business_csv, ratings_csv, reviews_csv]
     missing_files = [f for f in processed_files if not os.path.exists(f)]
@@ -38,8 +38,8 @@ def run_preprocessing():
 
 def run_content_based(business_id=None, top_n=5):
     # Load preprocessed business metadata and reviews
-    business_csv = os.path.join(processed_dir, "business_processed.csv")
-    reviews_csv = os.path.join(processed_dir, "reviews_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
+    reviews_csv = os.path.join(processed_data_path, "reviews_processed.csv")
 
     business_df = pd.read_csv(business_csv)
     reviews_df = pd.read_csv(reviews_csv)
@@ -53,7 +53,7 @@ def run_content_based(business_id=None, top_n=5):
     recommendations = l1.recommend_similar_businesses(business_id, profiles, top_n=top_n)
 
     # Get business names for better readability
-    business_csv = os.path.join(processed_dir, "business_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
     business_df = pd.read_csv(business_csv)
 
     # Get user's name
@@ -74,7 +74,7 @@ def run_content_based(business_id=None, top_n=5):
 
 def run_collaborative(user_id=None, top_n=5):
     # Load preprocessed ratings
-    ratings_csv = os.path.join(processed_dir, "ratings_processed.csv")
+    ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
 
     ratings_df = pd.read_csv(ratings_csv)
     matrix_components = build_user_item_matrix_components(ratings_df)
@@ -89,8 +89,8 @@ def run_collaborative(user_id=None, top_n=5):
     recommendations = l2.user_based_recommendations(user_id, matrix_components, top_n=top_n)
 
     # Get user's name and business names for better readability
-    users_csv = os.path.join(processed_dir, "user_processed.csv")
-    business_csv = os.path.join(processed_dir, "business_processed.csv")
+    users_csv = os.path.join(processed_data_path, "user_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
     user_df = pd.read_csv(users_csv)
     business_df = pd.read_csv(business_csv)
 
@@ -112,7 +112,7 @@ def run_collaborative(user_id=None, top_n=5):
 
 def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
     # Load preprocessed ratings
-    ratings_csv = os.path.join(processed_dir, "ratings_processed.csv")
+    ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
 
     ratings_df = pd.read_csv(ratings_csv)
     matrix_components = build_user_item_matrix_components(ratings_df)
@@ -130,8 +130,8 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
                                                               top_n=top_n)
 
     # Get user's name and business names for better readability
-    users_csv = os.path.join(processed_dir, "user_processed.csv")
-    business_csv = os.path.join(processed_dir, "business_processed.csv")
+    users_csv = os.path.join(processed_data_path, "user_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
     user_df = pd.read_csv(users_csv)
     business_df = pd.read_csv(business_csv)
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     parser.add_argument('--method', type=str, required=True, choices=['content', 'cf', 'svd'],
                         help="Select the recommendation method: 'content' for Content-Based, 'cf' for Collaborative Filtering, 'svd' for Matrix Factorization")
     parser.add_argument('--id', type=str, required=False,
-                        help="ID of the business (for content-based) or user (for collab/svd). Defaults to the first record if not provided.")
+                        help="ID of the business (for content-based) or user (for cf/svd). Defaults to the first record if not provided.")
     parser.add_argument('--top_n', type=int, default=5,
                         help="Number of recommendations to return (default is 5).")
     parser.add_argument('--n_factors', type=int, default=20,
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     os.environ['TESTING'] = str(args.testing)
 
     # Determine the processed directory based on testing flag.
-    processed_dir = TEST_DATA_PROCESSED if args.testing else DATA_PROCESSED
+    processed_data_path = TEST_DATA_PROCESSED_PATH if args.testing else DATA_PROCESSED_PATH
 
     # Run preprocessing before executing any recommendations
     run_preprocessing()

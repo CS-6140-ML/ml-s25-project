@@ -17,9 +17,9 @@ def build_user_item_matrix_components(ratings_df):
 
 
 if __name__ == "__main__":
-    from util.paths import DATA_PROCESSED
+    from util.paths import DATA_PROCESSED_PATH
 
-    ratings_csv = DATA_PROCESSED + "/ratings_processed.csv"
+    ratings_csv = DATA_PROCESSED_PATH + "/ratings_processed.csv"
     ratings_df = pd.read_csv(ratings_csv)
     matrix_components = build_user_item_matrix_components(ratings_df)
     sample_user_id = matrix_components[1][0]

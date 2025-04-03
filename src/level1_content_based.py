@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from src.common.cache import cache_results
 from src.common.sentiment_analysis import batch_sentiment_analysis
 from src.common.text_embeddings import compute_embeddings
-from util.paths import DATA_PROCESSED
+from util.paths import DATA_PROCESSED_PATH
 
 
 @cache_results("item_profiles_cache.pkl", force_recompute=False)
@@ -110,9 +110,8 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
 
 
 if __name__ == "__main__":
-    # Load processed data using centralized paths
-    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
-    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+    business_csv = os.path.join(DATA_PROCESSED_PATH, "business_processed.csv")
+    reviews_csv = os.path.join(DATA_PROCESSED_PATH, "reviews_processed.csv")
     business_df = pd.read_csv(business_csv)
     reviews_df = pd.read_csv(reviews_csv)
 

@@ -2,7 +2,7 @@ import os
 import pickle
 from functools import wraps
 
-from util.paths import CACHE_DIR, TEST_CACHE_DIR
+from util.paths import CACHE_PATH, TEST_CACHE_PATH
 
 
 def cache_results(cache_filename, force_recompute=False):
@@ -17,7 +17,7 @@ def cache_results(cache_filename, force_recompute=False):
         def wrapper(*args, **kwargs):
             # Determine if in test mode
             test_mode = os.environ.get("TESTING", "False") == "True"
-            base_cache_dir = CACHE_DIR if not test_mode else TEST_CACHE_DIR
+            base_cache_dir = CACHE_PATH if not test_mode else TEST_CACHE_PATH
 
             final_cache_path = os.path.join(base_cache_dir, cache_filename)
 
