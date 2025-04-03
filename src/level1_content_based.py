@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
-from common.cache import cache_results
-from common.sentiment_analysis import batch_sentiment_analysis
-from common.text_embeddings import compute_embeddings
+from src.common.cache import cache_results
+from src.common.sentiment_analysis import batch_sentiment_analysis
+from src.common.text_embeddings import compute_embeddings
 # Import centralized paths and common modules
-from util.paths import CACHE_DIR, DATA_PROCESSED
+from util.paths import DATA_PROCESSED
 
 
 @cache_results("item_profiles_cache.pkl", force_recompute=False)

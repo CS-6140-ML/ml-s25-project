@@ -1,11 +1,8 @@
-import os
-
 import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
 
-from cache import cache_results
-from util.paths import CACHE_DIR
+from src.common.cache import cache_results
 
 # Set device to GPU if available.
 device = "cuda" if torch.cuda.is_available() else "cpu"

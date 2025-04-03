@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 from sklearn.decomposition import TruncatedSVD
 
-from common.cache import cache_results
-from util.paths import CACHE_DIR, DATA_PROCESSED
+from src.common.cache import cache_results
+from util.paths import DATA_PROCESSED
 
 
 def build_user_item_matrix(ratings_df):

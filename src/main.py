@@ -1,13 +1,14 @@
 import argparse
 import os
+
 import pandas as pd
 
 # Import Level 1: Content-Based Filtering functions
-import level1_content_based as l1
+import src.level1_content_based as l1
 # Import Level 2: Collaborative Filtering functions
-import level2_cf as l2
+import src.level2_cf as l2
 # Import Level 3: Matrix Factorization functions
-import level3_matrix_factorization as l3
+import src.level3_matrix_factorization as l3
 from util.paths import DATA_PROCESSED, TEST_DATA_PROCESSED
 
 
@@ -22,7 +23,7 @@ def run_preprocessing():
 
     if missing_files:
         print("Processed files missing. Running preprocessing steps...")
-        from common.data_preprocessing import preprocess_ratings, preprocess_reviews, preprocess_business, \
+        from src.data_preprocessing import preprocess_ratings, preprocess_reviews, preprocess_business, \
             preprocess_checkin, preprocess_user
 
         preprocess_business()
