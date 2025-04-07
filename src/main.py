@@ -108,7 +108,7 @@ def run_collaborative(user_id=None, top_n=5):
         print(f"{i}. {name}")
 
 
-def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
+def run_matrix_factorization(user_id=None, top_n=5, n_factors=50):
     # Load preprocessed ratings
     ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
 
@@ -149,7 +149,7 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
         print(f"{i}. {name}")
 
 
-def run_matrix_factorization_with_pca(user_id=None, top_n=5, n_factors=20, variance_threshold=0.8):
+def run_matrix_factorization_with_pca(user_id=None, top_n=5, n_factors=50, variance_threshold=0.8):
     # Load preprocessed ratings
     ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
 
@@ -199,7 +199,7 @@ if __name__ == "__main__":
                         help="ID of the business (for content-based) or user (for cf/svd). Defaults to the first record if not provided.")
     parser.add_argument('--top_n', type=int, default=5,
                         help="Number of recommendations to return (default is 5).")
-    parser.add_argument('--n_factors', type=int, default=20,
+    parser.add_argument('--n_factors', type=int, default=50,
                         help="Number of latent factors for SVD in matrix factorization (default is 20).")
     parser.add_argument('--variance_threshold', type=float, default=0.8,
                         help="Variance Threshold limit for Matrix Factorization with PCA method (default is 80% or 0.8).")

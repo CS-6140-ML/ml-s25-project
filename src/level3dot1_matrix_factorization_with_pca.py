@@ -34,18 +34,34 @@ def train_svd_pca(sparse_matrix, n_factors=50, variance_threshold=0.8):
 
     centered_matrix = centered_matrix.tocsr()
 
-    # Initialize SVD with maximum components
-    svd = TruncatedSVD(n_components=n_factors, random_state=42)
+    max_components = min(n_factors, centered_matrix.shape[1] - 1, centered_matrix.shape[0] - 1)
+    svd = TruncatedSVD(n_components=max_components, random_state=42)
     svd.fit(centered_matrix)
+
+    # Calculate total explained variance and show it
+    total_variance = svd.explained_variance_ratio_.sum()
+    print(f"Total variance explained by all {max_components} components: {total_variance:.2%}")
 
     # Calculate cumulative explained variance
     explained_variance = svd.explained_variance_ratio_
     cumulative_variance = np.cumsum(explained_variance)
 
-    # Find minimum components needed to reach variance threshold
-    n_components_kept = 1
-    if np.any(cumulative_variance >= variance_threshold):
-        n_components_kept = np.argmax(cumulative_variance >= variance_threshold) + 1
+    # Find components needed to reach variance threshold (relative to total available)
+    adjusted_threshold = variance_threshold * total_variance
+    n_components_kept = max_components
+
+    below_threshold = cumulative_variance < adjusted_threshold
+    if np.any(below_threshold):
+        n_components_kept = np.sum(below_threshold)
+    else:
+        # If even 1 component exceeds threshold, use 1 component
+        n_components_kept = 1
+
+    # Print variance explained by the selected components
+    variance_explained = cumulative_variance[n_components_kept - 1]
+    print(f"Selected {n_components_kept} out of {max_components} components")
+    print(
+        f"These components explain {variance_explained:.2%} of total variance ({variance_explained / total_variance:.2%} of available variance)")
 
     # Retrain with exactly n_components_kept
     svd = TruncatedSVD(n_components=n_components_kept, random_state=42)
