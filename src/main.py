@@ -2,6 +2,7 @@ import argparse
 import os
 
 import pandas as pd
+from torch.nn.functional import threshold
 
 # Import Level 1: Content-Based Filtering functions
 import src.level1_content_based as l1
@@ -9,6 +10,9 @@ import src.level1_content_based as l1
 import src.level2_cf as l2
 # Import Level 3: Matrix Factorization functions
 import src.level3_matrix_factorization as l3
+# Import Level 3.1: Matrix Factorization with PCA functions
+import src.level3dot1_matrix_factorization_with_pca as l3dot1
+
 from src.common.data_preprocessing import preprocess_data
 from src.common.user_item_matrix_components import build_user_item_matrix_components
 from util.paths import DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
@@ -145,9 +149,51 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=20):
         print(f"{i}. {name}")
 
 
+def run_matrix_factorization_with_pca(user_id=None, top_n=5, n_factors=20, variance_threshold=0.8):
+    # Load preprocessed ratings
+    ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
+
+    ratings_df = pd.read_csv(ratings_csv)
+    matrix_components = build_user_item_matrix_components(ratings_df)
+
+    sparse_matrix, user_ids, business_ids = matrix_components
+
+    if user_id is None:
+        user_id = user_ids[0]
+        print(f"No user_id provided. Using default: {user_id}")
+
+    print("Generating Matrix Factorization with PCA (SVD-PCA) recommendations...")
+    svd_model_components = l3dot1.train_svd_pca(sparse_matrix, n_factors=n_factors,
+                                                variance_threshold=variance_threshold)
+
+    recommendations = l3dot1.matrix_factorization_with_pca_recommendations(user_id, matrix_components,
+                                                                           svd_model_components, top_n=top_n)
+
+    # Get user's name and business names for better readability
+    users_csv = os.path.join(processed_data_path, "user_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
+    user_df = pd.read_csv(users_csv)
+    business_df = pd.read_csv(business_csv)
+
+    # Get user's name
+    user_name = user_df[user_df['user_id'] == user_id]['name'].iloc[0] if not user_df[
+        user_df['user_id'] == user_id].empty else "Unknown"
+
+    # Get business names for recommendations
+    business_names = []
+    for business_id in recommendations:
+        business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
+            business_df['business_id'] == business_id].empty else "Unknown"
+        business_names.append(f"{business_name}")
+
+    print(f"Matrix Factorization (SVD) Recommendations for user '{user_name}':")
+    for i, name in enumerate(business_names, 1):
+        print(f"{i}. {name}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hybrid Yelp Recommendation System - Main Integration")
-    parser.add_argument('--method', type=str, required=True, choices=['content', 'cf', 'svd'],
+    parser.add_argument('--method', type=str, required=True, choices=['content', 'cf', 'svd', 'svd-pca'],
                         help="Select the recommendation method: 'content' for Content-Based, 'cf' for Collaborative Filtering, 'svd' for Matrix Factorization")
     parser.add_argument('--id', type=str, required=False,
                         help="ID of the business (for content-based) or user (for cf/svd). Defaults to the first record if not provided.")
@@ -155,6 +201,8 @@ if __name__ == "__main__":
                         help="Number of recommendations to return (default is 5).")
     parser.add_argument('--n_factors', type=int, default=20,
                         help="Number of latent factors for SVD in matrix factorization (default is 20).")
+    parser.add_argument('--variance_threshold', type=float, default=0.8,
+                        help="Variance Threshold limit for Matrix Factorization with PCA method (default is 80% or 0.8).")
     parser.add_argument('--testing', type=bool, default=False,
                         help="Set to True to use test (5% subsample) data.")
     args = parser.parse_args()
@@ -174,3 +222,6 @@ if __name__ == "__main__":
         run_collaborative(user_id=args.id, top_n=args.top_n)
     elif args.method == "svd":
         run_matrix_factorization(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors)
+    elif args.method == "svd-pca":
+        run_matrix_factorization_with_pca(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors,
+                                          variance_threshold=args.variance_threshold)

@@ -10,16 +10,14 @@ from src.common.user_item_matrix_components import build_user_item_matrix_compon
 
 
 @cache_results("svd_model_cache.pkl", force_recompute=False)
-def train_svd(sparse_matrix, n_factors=20):
+def train_svd(sparse_matrix, n_factors=50):
     """
-    Train SVD on the sparse user-item matrix and cache the model along with factor matrices.
-
-    Returns:
-        tuple: (svd_model, U matrix, Vt matrix)
+    Train SVD on the sparse user-item matrix.
     """
     svd = TruncatedSVD(n_components=n_factors, random_state=42)
     U = svd.fit_transform(sparse_matrix)
     Vt = svd.components_
+
     return svd, U, Vt
 
 
@@ -65,7 +63,7 @@ if __name__ == "__main__":
     sparse_matrix, user_ids, business_ids = matrix_components
 
     sample_user_id = user_ids[0]
-    svd_model_components = train_svd(sparse_matrix, n_factors=20)
+    svd_model_components = train_svd(sparse_matrix, n_factors=50)
     recommendations = matrix_factorization_recommendations(sample_user_id, sparse_matrix, svd_model_components, top_n=5)
     print(f"Matrix Factorization Recommendations for user {sample_user_id}:")
     print(recommendations)
