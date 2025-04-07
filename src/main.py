@@ -56,12 +56,12 @@ def run_content_based(business_id=None, top_n=5):
 
     # Get business names for recommendations
     business_names = []
-    for business_id in recommendations:
-        business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
-            business_df['business_id'] == business_id].empty else "Unknown"
-        business_names.append(f"{business_name}")
+    for rec_business_id, score in recommendations:
+        business_name = business_df[business_df['business_id'] == rec_business_id]['name'].iloc[0] if not business_df[
+            business_df['business_id'] == rec_business_id].empty else "Unknown"
+        business_names.append(f"{business_name} (ID: {rec_business_id}. Score: {score})")
 
-    print(f"Content-Based Filtering Recommendations for business '{business_name}':")
+    print(f"Content-Based Filtering Recommendations for business '{business_name}' (ID: {business_id}:")
     for i, name in enumerate(business_names, 1):
         print(f"{i}. {name}")
 

@@ -36,16 +36,21 @@ def matrix_factorization_recommendations(user_id, matrix_components, svd_model_c
     try:
         target_idx = user_ids.index(user_id)
     except ValueError:
-        print("User ID not found.")
+        print(f"User ID {user_id} not found.")
         return []
 
     # Compute predicted ratings for the target user
-    predicted_ratings = np.dot(U[target_idx], Vt)
-    # Retrieve the target user's actual ratings from the sparse matrix
+    user_factors = U[target_idx]
+    item_factors = Vt
+    predicted_ratings = np.dot(user_factors, item_factors)
+
+    # Get items the user hasn't rated yet
     target_ratings = sparse_matrix[target_idx].toarray().flatten()
+
     # Only consider items that the target user hasn't rated
     candidate_indices = np.where(target_ratings == 0)[0]
     candidate_predictions = predicted_ratings[candidate_indices]
+
     # Get the indices of the top predicted items
     top_candidate_indices = candidate_indices[np.argsort(candidate_predictions)[::-1][:top_n]]
     recommended_items = [business_ids[i] for i in top_candidate_indices]
