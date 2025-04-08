@@ -173,11 +173,11 @@ if __name__ == "__main__":
 
     # Execute the selected recommendation method
     if args.method == "content_tf_idf":
-        run_content_based(business_id=args.id, top_n=args.top_n, method='tf_idf')
+        run_content_based(user_id=args.id, top_n=args.top_n, method='tf_idf')
     elif args.method == "content_sentence_transformer":
-        run_content_based(business_id=args.id, top_n=args.top_n, method='sentence_transformer')
+        run_content_based(user_id=args.id, top_n=args.top_n, method='sentence_transformer')
     elif args.method == "content_lsa":
-        run_content_based(business_id=args.id, top_n=args.top_n, method='lsa')
+        run_content_based(user_id=args.id, top_n=args.top_n, method='lsa')
     elif args.method == "cf":
         run_collaborative(user_id=args.id, top_n=args.top_n, method='cf')
     elif args.method == "svd":
