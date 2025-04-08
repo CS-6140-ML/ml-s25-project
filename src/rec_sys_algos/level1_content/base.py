@@ -1,3 +1,4 @@
+import collections
 import os
 import time
 
@@ -50,7 +51,7 @@ def build_item_profiles(business_df, reviews_df):
 def aggregate_business_reviews(reviews_df):
     """Cache the aggregation of review texts per business."""
     return reviews_df.groupby('business_id')['review_text'].apply(
-        lambda texts: " ".join(texts)).reset_index()
+        lambda texts: "SEP".join(texts)).reset_index()
 
 
 @cache_results("business_sentiments_cache.pkl", force_recompute=False)
@@ -77,6 +78,11 @@ def calculate_business_sentiments(reviews_df):
     seconds = (toc - tic) % 60
     print(f"Sentiment calculation took {minutes} minutes {seconds} seconds.")
     return avg_sentiments
+
+
+@cache_results("aggregated_reviews_cache.pkl", force_recompute=False)
+def aggregate_reviews(reviews_df):
+    return reviews_df.groupby('business_id')['review_text'].apply(lambda texts: "[SEP]".join(texts)).reset_index()
 
 
 def recommend_similar_businesses(business_id, item_profiles, top_n=5):
@@ -108,17 +114,52 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
     return [(other_business_ids[i], sim_scores[i]) for i in top_indices]
 
 
+def content_based_recommendations(user_id, ratings_df, profiles, top_n=5):
+    # Get the top 3 highest-rated restaurants for the user
+    user_ratings = ratings_df[ratings_df['user_id'] == user_id]
+    top_rated = user_ratings.sort_values(by='stars', ascending=False).head(3)
+
+    if top_rated.empty:
+        print(f"No ratings found for user {user_id}.")
+        return []
+
+    # Get recommendations for each of the top 3 restaurants
+    all_recommendations = []
+    for _, row in top_rated.iterrows():
+        business_id = row['business_id']
+        recommendations = recommend_similar_businesses(business_id, profiles, top_n=top_n)
+        all_recommendations.extend(recommendations)
+
+    # Combine recommendations using score-based ranking with count as a tiebreaker
+    recommendation_scores = collections.defaultdict(list)
+    for business_id, score in all_recommendations:
+        recommendation_scores[business_id].append(score)
+
+    # Calculate final scores and counts
+    final_scores = [
+        (business_id, sum(scores) / len(scores), len(scores))  # (business_id, avg_score, count)
+        for business_id, scores in recommendation_scores.items()
+    ]
+
+    # Sort by average score (descending), then by count (descending)
+    final_scores.sort(key=lambda x: (-x[1], -x[2]))
+
+    return [(business_id, avg_score) for business_id, avg_score, count in final_scores[:top_n]]
+
+
 if __name__ == "__main__":
     business_csv = os.path.join(DATA_PROCESSED_PATH, "business_processed.csv")
     reviews_csv = os.path.join(DATA_PROCESSED_PATH, "reviews_processed.csv")
+    ratings_csv = os.path.join(DATA_PROCESSED_PATH, "ratings_processed.csv")
     business_df = pd.read_csv(business_csv)
     reviews_df = pd.read_csv(reviews_csv)
+    ratings_df = pd.read_csv(reviews_csv)
 
     print("Building item profiles...")
     profiles = build_item_profiles(business_df, reviews_df)
 
     # Pick a sample business_id from the business dataframe
-    sample_business_id = business_df['business_id'].iloc[0]
-    recommendations = recommend_similar_businesses(sample_business_id, profiles, top_n=5)
-    print(f"Content-Based Recommendations for business {sample_business_id}:")
+    sample_user_id = ratings_df['user_id'].iloc[0]
+    recommendations = content_based_recommendations(sample_user_id, ratings_df, profiles, top_n=5)
+    print(f"Content-Based Recommendations for user {sample_user_id}:")
     print(recommendations)
