@@ -18,7 +18,6 @@ def compute_embeddings(texts, n_components=100):
     return svd.fit_transform(tfidf_matrix)
 
 
-@cache_results("lsa_item_profiles_cache.pkl", force_recompute=False)
 def build_item_profiles(business_df, reviews_df):
     """Build item profiles using LSA embeddings."""
     aggregated_reviews = base.aggregate_reviews(reviews_df)
