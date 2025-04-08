@@ -38,6 +38,29 @@ def run_preprocessing(test_mode=False):
     validate_processed_files(processed_data_path)
 
 
+def print_recommendations(user_id, recommendations):
+    # Get user's name and business names for better readability
+    users_csv = os.path.join(processed_data_path, "user_processed.csv")
+    business_csv = os.path.join(processed_data_path, "business_processed.csv")
+    user_df = pd.read_csv(users_csv)
+    business_df = pd.read_csv(business_csv)
+
+    # Get user's name
+    user_name = user_df[user_df['user_id'] == user_id]['name'].iloc[0] if not user_df[
+        user_df['user_id'] == user_id].empty else "Unknown"
+
+    # Get business names for recommendations
+    business_names = []
+    for rec_business_id, score in recommendations:
+        business_name = business_df[business_df['business_id'] == rec_business_id]['name'].iloc[0] if not business_df[
+            business_df['business_id'] == rec_business_id].empty else "Unknown"
+        business_names.append(f"{business_name} (ID: {rec_business_id}. Score: {round(score, 2)})")
+
+    print(f"Recommendations for user '{user_name}':")
+    for i, name in enumerate(business_names, 1):
+        print(f"{i}. {name}")
+
+
 def run_content_based(user_id=None, top_n=5, method='tfidf'):
     """Run Content-Based Filtering."""
     business_csv = os.path.join(processed_data_path, "business_processed.csv")
@@ -52,14 +75,6 @@ def run_content_based(user_id=None, top_n=5, method='tfidf'):
         user_id = ratings_df['user_id'].iloc[0]
         print(f"No user_id provided. Using default: {user_id}")
 
-    # Get the top 3 highest-rated restaurants for the user
-    user_ratings = ratings_df[ratings_df['user_id'] == user_id]
-    top_rated = user_ratings.sort_values(by='stars', ascending=False).head(3)
-
-    if top_rated.empty:
-        print(f"No ratings found for user {user_id}.")
-        return []
-
     l1 = l1dot1
     if method == 'tfidf':
         l1 = l1dot1
@@ -72,47 +87,9 @@ def run_content_based(user_id=None, top_n=5, method='tfidf'):
     print("Building item profiles using Content-Based Filtering...")
     profiles = l1.build_item_profiles(business_df, reviews_df)
 
-    # Get recommendations for each of the top 3 restaurants
-    all_recommendations = []
-    for _, row in top_rated.iterrows():
-        business_id = row['business_id']
-        recommendations = l1.recommend_similar_businesses(business_id, profiles, top_n=top_n)
-        all_recommendations.extend(recommendations)
+    recommendations = l1.user_based_recommendations(user_id, ratings_df, profiles, top_n=top_n)
 
-    # Combine recommendations using score-based ranking with count as a tiebreaker
-    recommendation_scores = collections.defaultdict(list)
-    for business_id, score in all_recommendations:
-        recommendation_scores[business_id].append(score)
-
-    # Calculate final scores and counts
-    final_scores = [
-        (business_id, sum(scores) / len(scores), len(scores))  # (business_id, avg_score, count)
-        for business_id, scores in recommendation_scores.items()
-    ]
-
-    # Sort by average score (descending), then by count (descending)
-    final_scores.sort(key=lambda x: (-x[1], -x[2]))
-
-    # Get user's name and business names for better readability
-    users_csv = os.path.join(processed_data_path, "user_processed.csv")
-    business_csv = os.path.join(processed_data_path, "business_processed.csv")
-    user_df = pd.read_csv(users_csv)
-    business_df = pd.read_csv(business_csv)
-
-    # Get user's name
-    user_name = user_df[user_df['user_id'] == user_id]['name'].iloc[0] if not user_df[
-        user_df['user_id'] == user_id].empty else "Unknown"
-
-    # Get business names for recommendations
-    business_names = []
-    for rec_business_id, score, _ in final_scores:
-        business_name = business_df[business_df['business_id'] == rec_business_id]['name'].iloc[0] if not business_df[
-            business_df['business_id'] == rec_business_id].empty else "Unknown"
-        business_names.append(f"{business_name} (ID: {rec_business_id}. Score: {score})")
-
-    print(f"Content-Based Filtering Recommendations for business '{business_name}' (ID: {business_id}:")
-    for i, name in enumerate(business_names, 1):
-        print(f"{i}. {name}")
+    print_recommendations(user_id, recommendations)
 
 
 def run_collaborative(user_id=None, top_n=5, method='cf'):
@@ -134,26 +111,7 @@ def run_collaborative(user_id=None, top_n=5, method='cf'):
     print("Generating Collaborative Filtering recommendations...")
     recommendations = l2.user_based_recommendations(user_id, matrix_components, top_n=top_n)
 
-    # Get user's name and business names for better readability
-    users_csv = os.path.join(processed_data_path, "user_processed.csv")
-    business_csv = os.path.join(processed_data_path, "business_processed.csv")
-    user_df = pd.read_csv(users_csv)
-    business_df = pd.read_csv(business_csv)
-
-    # Get user's name
-    user_name = user_df[user_df['user_id'] == user_id]['name'].iloc[0] if not user_df[
-        user_df['user_id'] == user_id].empty else "Unknown"
-
-    # Get business names for recommendations
-    business_names = []
-    for business_id in recommendations:
-        business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
-            business_df['business_id'] == business_id].empty else "Unknown"
-        business_names.append(f"{business_name}")
-
-    print(f"Collaborative Filtering Recommendations for user '{user_name}':")
-    for i, name in enumerate(business_names, 1):
-        print(f"{i}. {name}")
+    print_recommendations(user_id, recommendations)
 
 
 def run_matrix_factorization(user_id=None, top_n=5, n_factors=50, variance_threshold=0.8, method='svd'):
@@ -181,26 +139,7 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=50, variance_thres
     recommendations = l3.matrix_factorization_recommendations(user_id, matrix_components, svd_model_components,
                                                               top_n=top_n)
 
-    # Get user's name and business names for better readability
-    users_csv = os.path.join(processed_data_path, "user_processed.csv")
-    business_csv = os.path.join(processed_data_path, "business_processed.csv")
-    user_df = pd.read_csv(users_csv)
-    business_df = pd.read_csv(business_csv)
-
-    # Get user's name
-    user_name = user_df[user_df['user_id'] == user_id]['name'].iloc[0] if not user_df[
-        user_df['user_id'] == user_id].empty else "Unknown"
-
-    # Get business names for recommendations
-    business_names = []
-    for business_id in recommendations:
-        business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
-            business_df['business_id'] == business_id].empty else "Unknown"
-        business_names.append(f"{business_name}")
-
-    print(f"Matrix Factorization (SVD) Recommendations for user '{user_name}':")
-    for i, name in enumerate(business_names, 1):
-        print(f"{i}. {name}")
+    print_recommendations(user_id, recommendations)
 
 
 if __name__ == "__main__":

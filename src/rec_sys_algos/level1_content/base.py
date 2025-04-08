@@ -1,3 +1,4 @@
+import collections
 import os
 import time
 
@@ -111,6 +112,39 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
     # Get indices of top similar businesses
     top_indices = np.argsort(sim_scores)[::-1][:top_n]
     return [(other_business_ids[i], sim_scores[i]) for i in top_indices]
+
+
+def user_based_recommendations(user_id, ratings_df, profiles, top_n=5):
+    # Get the top 3 highest-rated restaurants for the user
+    user_ratings = ratings_df[ratings_df['user_id'] == user_id]
+    top_rated = user_ratings.sort_values(by='stars', ascending=False).head(3)
+
+    if top_rated.empty:
+        print(f"No ratings found for user {user_id}.")
+        return []
+
+    # Get recommendations for each of the top 3 restaurants
+    all_recommendations = []
+    for _, row in top_rated.iterrows():
+        business_id = row['business_id']
+        recommendations = recommend_similar_businesses(business_id, profiles, top_n=top_n)
+        all_recommendations.extend(recommendations)
+
+    # Combine recommendations using score-based ranking with count as a tiebreaker
+    recommendation_scores = collections.defaultdict(list)
+    for business_id, score in all_recommendations:
+        recommendation_scores[business_id].append(score)
+
+    # Calculate final scores and counts
+    final_scores = [
+        (business_id, sum(scores) / len(scores), len(scores))  # (business_id, avg_score, count)
+        for business_id, scores in recommendation_scores.items()
+    ]
+
+    # Sort by average score (descending), then by count (descending)
+    final_scores.sort(key=lambda x: (-x[1], -x[2]))
+
+    return [(business_id, avg_score) for business_id, avg_score, count in final_scores[:top_n]]
 
 
 if __name__ == "__main__":

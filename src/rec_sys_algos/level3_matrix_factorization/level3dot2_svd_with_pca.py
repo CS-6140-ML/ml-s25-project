@@ -107,8 +107,8 @@ def matrix_factorization_recommendations(user_id, matrix_components, svd_model_c
 
     # Get the indices of the top predicted items
     top_candidate_indices = candidate_indices[np.argsort(candidate_predictions)[::-1][:top_n]]
-    recommended_items = [business_ids[i] for i in top_candidate_indices]
-    return recommended_items
+    recommendations = [(business_ids[i], candidate_predictions[i]) for i in top_candidate_indices]
+    return sorted(recommendations, key=lambda x: x[1], reverse=True)
 
 
 if __name__ == "__main__":

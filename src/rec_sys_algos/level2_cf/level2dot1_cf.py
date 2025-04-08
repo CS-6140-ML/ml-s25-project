@@ -44,7 +44,7 @@ def user_based_recommendations(user_id, matrix_components, top_n=5, num_similar=
             predicted_ratings[business_ids[j]] = numerator / denominator
 
     recommended_items = sorted(predicted_ratings.items(), key=lambda x: x[1], reverse=True)[:top_n]
-    return [item for item, score in recommended_items]
+    return recommended_items
 
 
 if __name__ == "__main__":
