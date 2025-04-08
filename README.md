@@ -59,13 +59,16 @@ ml-s25-project/
     - Place your Yelp data files in the `data/raw/json` directory
 5. Run the recommendation system:
     - Content-based Filtering
-        - `python -m src.main --method content --id [USER_ID] --top_n 5 --testing True`
+        - TF-IDF / Sentence Transformer / LSA
+            - `python -m src.main --method [METHOD] --id [USER_ID] --top_n 5 --testing`
+            - `[METHOD] = content_tf_idf, content_sentence_transformer, content_lsa`
     - Collaborative Filtering
-        - `python -m src.main --method cf --id [USER_ID] --top_n 5 --testing True`
+        - `python -m src.main --method cf --id [USER_ID] --top_n 5 --testing`
     - Matrix Factorization
-        - `python -m src.main --method svd --id [USER_ID] --top_n 5 --testing True`
-    - Matrix Factorization with PCA
-        - `python -m src.main --method svd-pca --id [USER_ID] --top_n 5 --variance_threshold 0.8 --testing True`
+        - SVD
+            - `python -m src.main --method svd --id [USER_ID] --top_n 5 --testing`
+        - SVD with PCA
+            - `python -m src.main --method svd_with_pca --id [USER_ID] --top_n 5 --variance_threshold 0.8 --testing`
     - Common Parameters
         - `--method`: Method to use for recommendation (content, cf, svd, hybrid, clustered)
             - Mandatory
@@ -75,8 +78,8 @@ ml-s25-project/
             - Optional, default 5
         - `--variance_threshold`: Threshold for Variance limit used for PCA
             - Optional, default 0.8
-        - `--testing`: Whether to run in testing mode (True/False)
-            - Optional, default False
+        - `--testing`: Whether to run in testing mode
+            - Optional, default to False if the tag is not present
 
 ## Future Work
 

@@ -63,7 +63,10 @@ if __name__ == "__main__":
     sparse_matrix, user_ids, business_ids = matrix_components
 
     sample_user_id = user_ids[0]
+
+    # Train SVD
     svd_model_components = train_svd(sparse_matrix, n_factors=50)
-    recommendations = matrix_factorization_recommendations(sample_user_id, sparse_matrix, svd_model_components, top_n=5)
+    recommendations = matrix_factorization_recommendations(sample_user_id, matrix_components, svd_model_components,
+                                                           top_n=5)
     print(f"Matrix Factorization Recommendations for user {sample_user_id}:")
     print(recommendations)

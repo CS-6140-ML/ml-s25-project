@@ -10,7 +10,7 @@ from src.common.user_item_matrix_components import build_user_item_matrix_compon
 
 
 @cache_results("svd_pca_model_cache.pkl", force_recompute=False)
-def train_svd_pca(sparse_matrix, n_factors=50, variance_threshold=0.8):
+def train_svd(sparse_matrix, n_factors=50, variance_threshold=0.8):
     """
     Train SVD on the centered sparse user-item matrix and keep only principal components
     that explain sufficient variance.
@@ -74,7 +74,7 @@ def train_svd_pca(sparse_matrix, n_factors=50, variance_threshold=0.8):
     return svd, U, Vt, row_means
 
 
-def matrix_factorization_with_pca_recommendations(user_id, matrix_components, svd_model_components, top_n=5):
+def matrix_factorization_recommendations(user_id, matrix_components, svd_model_components, top_n=5):
     """
     Recommend items for a given user using the SVD-PCA model.
 
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     sample_user_id = user_ids[0]
 
     # Train SVD with 80% variance threshold (based on Pareto's Principle)
-    svd_model_components = train_svd_pca(sparse_matrix, n_factors=50, variance_threshold=0.8)
-    recommendations = matrix_factorization_with_pca_recommendations(sample_user_id, matrix_components,
-                                                                    svd_model_components, top_n=5)
+    svd_model_components = train_svd(sparse_matrix, n_factors=50, variance_threshold=0.8)
+    recommendations = matrix_factorization_recommendations(sample_user_id, matrix_components, svd_model_components,
+                                                           top_n=5)
     print(f"Matrix Factorization with PCA Recommendations for user {sample_user_id}:")
     print(recommendations)
