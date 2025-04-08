@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import torch
 from sentence_transformers import SentenceTransformer
 
 from src.common.cache import cache_results
@@ -9,13 +10,13 @@ from util.paths import DATA_PROCESSED_PATH
 
 
 @cache_results("sentence_transformer_embeddings_cache.pkl", force_recompute=False)
-def compute_embeddings(texts):
-    """Compute Sentence Transformer embeddings for a list of texts."""
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    return model.encode(texts, convert_to_numpy=True)
+def compute_embeddings(texts, batch_size=32):
+    """Compute Sentence Transformer embeddings with optimizations."""
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model = SentenceTransformer('all-MiniLM-L6-v2', device=device)
+    return model.encode(texts, batch_size=batch_size, convert_to_tensor=True, show_progress_bar=True)
 
 
-@cache_results("item_profiles_sentence_transformer_cache.pkl", force_recompute=False)
 def build_item_profiles(business_df, reviews_df):
     """Build item profiles using Sentence Transformer embeddings."""
     aggregated_reviews = base.aggregate_reviews(reviews_df)
@@ -26,7 +27,7 @@ def build_item_profiles(business_df, reviews_df):
 
 
 def content_based_recommendations(user_id, ratings_df, profiles, top_n=5):
-    base.content_based_recommendations(user_id, ratings_df, profiles, top_n)
+    return base.content_based_recommendations(user_id, ratings_df, profiles, top_n)
 
 
 if __name__ == "__main__":

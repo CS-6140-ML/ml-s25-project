@@ -53,7 +53,7 @@ def print_recommendations(user_id, recommendations):
     for rec_business_id, score in recommendations:
         business_name = business_df[business_df['business_id'] == rec_business_id]['name'].iloc[0] if not business_df[
             business_df['business_id'] == rec_business_id].empty else "Unknown"
-        business_names.append(f"{business_name} (ID: {rec_business_id}. Score: {round(score, 2)})")
+        business_names.append(f"{business_name} (ID: {rec_business_id}. Score: {round(float(score), 2)})")
 
     print(f"Recommendations for user '{user_name}':")
     for i, name in enumerate(business_names, 1):
@@ -82,10 +82,8 @@ def run_content_based(user_id=None, top_n=5, method='tfidf'):
     elif method == 'lsa':
         l1 = l1dot3
 
-    # Build item profiles
-    print("Building item profiles using Content-Based Filtering...")
+    print("Generating Content-Based recommendations...")
     profiles = l1.build_item_profiles(business_df, reviews_df)
-
     recommendations = l1.content_based_recommendations(user_id, ratings_df, profiles, top_n=top_n)
 
     print_recommendations(user_id, recommendations)
@@ -108,7 +106,7 @@ def run_collaborative(user_id=None, top_n=5, method='cf'):
         l2 = l2dot1
 
     print("Generating Collaborative Filtering recommendations...")
-    recommendations = l2.user_based_recommendations(user_id, matrix_components, top_n=top_n)
+    recommendations = l2.cf_based_recommendations(user_id, matrix_components, top_n=top_n)
 
     print_recommendations(user_id, recommendations)
 
@@ -135,8 +133,8 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=50, variance_thres
         print("Generating Matrix Factorization with PCA (SVD-PCA) recommendations...")
         svd_model_components = l3.train_svd(sparse_matrix, n_factors=n_factors, variance_threshold=variance_threshold)
 
-    recommendations = l3.matrix_factorization_recommendations(user_id, matrix_components, svd_model_components,
-                                                              top_n=top_n)
+    recommendations = l3.matrix_factorization_based_recommendations(user_id, matrix_components, svd_model_components,
+                                                                    top_n=top_n)
 
     print_recommendations(user_id, recommendations)
 
@@ -173,11 +171,11 @@ if __name__ == "__main__":
 
     # Execute the selected recommendation method
     if args.method == "content_tf_idf":
-        run_content_based(business_id=args.id, top_n=args.top_n, method='tf_idf')
+        run_content_based(user_id=args.id, top_n=args.top_n, method='tf_idf')
     elif args.method == "content_sentence_transformer":
-        run_content_based(business_id=args.id, top_n=args.top_n, method='sentence_transformer')
+        run_content_based(user_id=args.id, top_n=args.top_n, method='sentence_transformer')
     elif args.method == "content_lsa":
-        run_content_based(business_id=args.id, top_n=args.top_n, method='lsa')
+        run_content_based(user_id=args.id, top_n=args.top_n, method='lsa')
     elif args.method == "cf":
         run_collaborative(user_id=args.id, top_n=args.top_n, method='cf')
     elif args.method == "svd":

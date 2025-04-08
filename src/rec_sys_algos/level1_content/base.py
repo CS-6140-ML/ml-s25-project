@@ -117,7 +117,7 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
 def content_based_recommendations(user_id, ratings_df, profiles, top_n=5):
     # Get the top 3 highest-rated restaurants for the user
     user_ratings = ratings_df[ratings_df['user_id'] == user_id]
-    top_rated = user_ratings.sort_values(by='stars', ascending=False).head(3)
+    top_rated = user_ratings.sort_values(by='rating', ascending=False).head(3)
 
     if top_rated.empty:
         print(f"No ratings found for user {user_id}.")
