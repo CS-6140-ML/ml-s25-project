@@ -1,7 +1,7 @@
 import argparse
 import os
+
 import pandas as pd
-import collections
 
 # Import Level 1: Content-Based Filtering functions
 import src.rec_sys_algos.level1_content.level1dot1_tf_idf as l1dot1
@@ -12,7 +12,6 @@ import src.rec_sys_algos.level2_cf.level2dot1_cf as l2dot1
 # Import Level 3: Matrix Factorization functions
 import src.rec_sys_algos.level3_matrix_factorization.level3dot1_svd as l3dot1
 import src.rec_sys_algos.level3_matrix_factorization.level3dot2_svd_with_pca as l3dot2
-
 from src.common.data_preprocessing import preprocess_data
 from src.common.user_item_matrix_components import build_user_item_matrix_components
 from util.paths import DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
@@ -87,7 +86,7 @@ def run_content_based(user_id=None, top_n=5, method='tfidf'):
     print("Building item profiles using Content-Based Filtering...")
     profiles = l1.build_item_profiles(business_df, reviews_df)
 
-    recommendations = l1.user_based_recommendations(user_id, ratings_df, profiles, top_n=top_n)
+    recommendations = l1.content_based_recommendations(user_id, ratings_df, profiles, top_n=top_n)
 
     print_recommendations(user_id, recommendations)
 

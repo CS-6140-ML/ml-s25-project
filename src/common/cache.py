@@ -1,8 +1,10 @@
+import hashlib
 import os
 import pickle
-import hashlib
 from functools import wraps
+
 import pandas as pd
+
 from util.paths import CACHE_PATH, TEST_CACHE_PATH
 
 
