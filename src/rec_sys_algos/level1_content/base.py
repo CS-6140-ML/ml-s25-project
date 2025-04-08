@@ -79,6 +79,11 @@ def calculate_business_sentiments(reviews_df):
     return avg_sentiments
 
 
+@cache_results("aggregated_reviews_cache.pkl", force_recompute=False)
+def aggregate_reviews(reviews_df):
+    return reviews_df.groupby('business_id')['review_text'].apply(lambda texts: "[SEP]".join(texts)).reset_index()
+
+
 def recommend_similar_businesses(business_id, item_profiles, top_n=5):
     """
     Recommend similar businesses based on cosine similarity between item profiles.

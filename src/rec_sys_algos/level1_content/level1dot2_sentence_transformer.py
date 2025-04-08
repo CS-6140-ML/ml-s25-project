@@ -5,7 +5,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from src.common.cache import cache_results
 from util.paths import DATA_PROCESSED_PATH
-from src.rec_sys_algos.level1_content.base import recommend_similar_businesses
+from src.rec_sys_algos.level1_content.base import aggregate_reviews, recommend_similar_businesses
 
 
 @cache_results("sentence_transformer_embeddings_cache.pkl", force_recompute=False)
@@ -18,8 +18,7 @@ def compute_embeddings(texts):
 @cache_results("item_profiles_sentence_transformer_cache.pkl", force_recompute=False)
 def build_item_profiles(business_df, reviews_df):
     """Build item profiles using Sentence Transformer embeddings."""
-    aggregated_reviews = reviews_df.groupby('business_id')['review_text'].apply(
-        lambda texts: " ".join(texts)).reset_index()
+    aggregated_reviews = aggregate_reviews(reviews_df)
     merged_df = pd.merge(business_df, aggregated_reviews, on='business_id', how='left')
     merged_df['review_text'] = merged_df['review_text'].fillna("")
     embeddings = compute_embeddings(merged_df['review_text'].tolist())

@@ -238,7 +238,7 @@ if __name__ == "__main__":
         run_content_based(business_id=args.id, top_n=args.top_n, method='tf_idf')
     elif args.method == "content_sentence_transformer":
         run_content_based(business_id=args.id, top_n=args.top_n, method='sentence_transformer')
-    elif args.method == "lsa":
+    elif args.method == "content_lsa":
         run_content_based(business_id=args.id, top_n=args.top_n, method='lsa')
     elif args.method == "cf":
         run_collaborative(user_id=args.id, top_n=args.top_n, method='cf')
