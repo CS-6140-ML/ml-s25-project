@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+from util.paths import DATA_PROCESSED_PATH
+from src.common.user_item_matrix_components import build_user_item_matrix_components
 
 
 def user_based_recommendations(user_id, matrix_components, top_n=5, num_similar=10):
@@ -46,10 +48,7 @@ def user_based_recommendations(user_id, matrix_components, top_n=5, num_similar=
 
 
 if __name__ == "__main__":
-    from util.paths import DATA_PROCESSED
-    from src.common.user_item_matrix_components import build_user_item_matrix_components
-
-    ratings_csv = DATA_PROCESSED + "/ratings_processed.csv"
+    ratings_csv = DATA_PROCESSED_PATH + "/ratings_processed.csv"
     ratings_df = pd.read_csv(ratings_csv)
     matrix_components = build_user_item_matrix_components(ratings_df)
 

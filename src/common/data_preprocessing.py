@@ -4,7 +4,7 @@ import os
 
 import pandas as pd
 
-from util.paths import DATA_RAW_JSON, DATA_RAW_CSV, DATA_PROCESSED, TEST_DATA_PROCESSED
+from util.paths import DATA_RAW_JSON_PATH, DATA_RAW_CSV_PATH, DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
 
 
 ##############################################
@@ -28,8 +28,8 @@ def parse_list_field(value, separator=","):
 # Conversion Functions (JSON -> CSV)
 ##############################################
 def convert_business_json_to_csv(
-        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_business.json"),
-        output_path=os.path.join(DATA_RAW_CSV, "business.csv"),
+        json_path=os.path.join(DATA_RAW_JSON_PATH, "yelp_academic_dataset_business.json"),
+        output_path=os.path.join(DATA_RAW_CSV_PATH, "business.csv"),
         chunk_size=10000
 ):
     columns_to_keep = [
@@ -72,9 +72,9 @@ def convert_business_json_to_csv(
 
 
 def convert_review_json_to_csv(
-        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_review.json"),
-        reviews_output=os.path.join(DATA_RAW_CSV, "reviews.csv"),
-        ratings_output=os.path.join(DATA_RAW_CSV, "ratings.csv"),
+        json_path=os.path.join(DATA_RAW_JSON_PATH, "yelp_academic_dataset_review.json"),
+        reviews_output=os.path.join(DATA_RAW_CSV_PATH, "reviews.csv"),
+        ratings_output=os.path.join(DATA_RAW_CSV_PATH, "ratings.csv"),
         chunk_size=10000
 ):
     reviews_columns = ["review_id", "user_id", "business_id", "review_text"]
@@ -127,8 +127,8 @@ def convert_review_json_to_csv(
 
 
 def convert_user_json_to_csv(
-        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_user.json"),
-        output_path=os.path.join(DATA_RAW_CSV, "user.csv"),
+        json_path=os.path.join(DATA_RAW_JSON_PATH, "yelp_academic_dataset_user.json"),
+        output_path=os.path.join(DATA_RAW_CSV_PATH, "user.csv"),
         chunk_size=10000
 ):
     columns_to_keep = [
@@ -166,8 +166,8 @@ def convert_user_json_to_csv(
 
 
 def convert_checkin_json_to_csv(
-        json_path=os.path.join(DATA_RAW_JSON, "yelp_academic_dataset_checkin.json"),
-        output_path=os.path.join(DATA_RAW_CSV, "checkin.csv"),
+        json_path=os.path.join(DATA_RAW_JSON_PATH, "yelp_academic_dataset_checkin.json"),
+        output_path=os.path.join(DATA_RAW_CSV_PATH, "checkin.csv"),
         chunk_size=10000
 ):
     output_fields = ["business_id", "date", "date_list"]
@@ -211,8 +211,8 @@ def clean_ratings(df):
     return df
 
 
-def preprocess_ratings(input_csv=os.path.join(DATA_RAW_CSV, "ratings.csv"),
-                       output_csv=os.path.join(DATA_PROCESSED, "ratings_processed.csv")):
+def preprocess_ratings(input_csv=os.path.join(DATA_RAW_CSV_PATH, "ratings.csv"),
+                       output_csv=os.path.join(DATA_PROCESSED_PATH, "ratings_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_ratings(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -226,8 +226,8 @@ def clean_reviews(df):
     return df
 
 
-def preprocess_reviews(input_csv=os.path.join(DATA_RAW_CSV, "reviews.csv"),
-                       output_csv=os.path.join(DATA_PROCESSED, "reviews_processed.csv")):
+def preprocess_reviews(input_csv=os.path.join(DATA_RAW_CSV_PATH, "reviews.csv"),
+                       output_csv=os.path.join(DATA_PROCESSED_PATH, "reviews_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_reviews(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -241,8 +241,8 @@ def clean_business(df):
     return df
 
 
-def preprocess_business(input_csv=os.path.join(DATA_RAW_CSV, "business.csv"),
-                        output_csv=os.path.join(DATA_PROCESSED, "business_processed.csv")):
+def preprocess_business(input_csv=os.path.join(DATA_RAW_CSV_PATH, "business.csv"),
+                        output_csv=os.path.join(DATA_PROCESSED_PATH, "business_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_business(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -256,8 +256,8 @@ def clean_user(df):
     return df
 
 
-def preprocess_user(input_csv=os.path.join(DATA_RAW_CSV, "user.csv"),
-                    output_csv=os.path.join(DATA_PROCESSED, "user_processed.csv")):
+def preprocess_user(input_csv=os.path.join(DATA_RAW_CSV_PATH, "user.csv"),
+                    output_csv=os.path.join(DATA_PROCESSED_PATH, "user_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_user(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -271,8 +271,8 @@ def clean_checkin(df):
     return df
 
 
-def preprocess_checkin(input_csv=os.path.join(DATA_RAW_CSV, "checkin.csv"),
-                       output_csv=os.path.join(DATA_PROCESSED, "checkin_processed.csv")):
+def preprocess_checkin(input_csv=os.path.join(DATA_RAW_CSV_PATH, "checkin.csv"),
+                       output_csv=os.path.join(DATA_PROCESSED_PATH, "checkin_processed.csv")):
     df = pd.read_csv(input_csv)
     df = clean_checkin(df)
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -293,12 +293,12 @@ def subsample_processed_data(percent=5):
     import shutil
 
     # Remove any existing test directory
-    if os.path.exists(TEST_DATA_PROCESSED):
-        shutil.rmtree(TEST_DATA_PROCESSED)
-    os.makedirs(TEST_DATA_PROCESSED, exist_ok=True)
+    if os.path.exists(TEST_DATA_PROCESSED_PATH):
+        shutil.rmtree(TEST_DATA_PROCESSED_PATH)
+    os.makedirs(TEST_DATA_PROCESSED_PATH, exist_ok=True)
 
     # Subsample ratings
-    ratings_file = os.path.join(DATA_PROCESSED, "ratings_processed.csv")
+    ratings_file = os.path.join(DATA_PROCESSED_PATH, "ratings_processed.csv")
     ratings_df = pd.read_csv(ratings_file)
     unique_users = ratings_df["user_id"].unique()
     total_users = len(unique_users)
@@ -306,14 +306,14 @@ def subsample_processed_data(percent=5):
     subset_users = unique_users[:subset_n]
     print(f"Total users: {total_users}. Subsampling {subset_n} users ({percent}%).")
     ratings_sub = ratings_df[ratings_df["user_id"].isin(subset_users)]
-    ratings_sub_file = os.path.join(TEST_DATA_PROCESSED, "ratings_processed.csv")
+    ratings_sub_file = os.path.join(TEST_DATA_PROCESSED_PATH, "ratings_processed.csv")
     ratings_sub.to_csv(ratings_sub_file, index=False)
 
     # Subsample reviews
-    reviews_file = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+    reviews_file = os.path.join(DATA_PROCESSED_PATH, "reviews_processed.csv")
     reviews_df = pd.read_csv(reviews_file)
     reviews_sub = reviews_df[reviews_df["user_id"].isin(subset_users)]
-    reviews_sub_file = os.path.join(TEST_DATA_PROCESSED, "reviews_processed.csv")
+    reviews_sub_file = os.path.join(TEST_DATA_PROCESSED_PATH, "reviews_processed.csv")
     reviews_sub.to_csv(reviews_sub_file, index=False)
 
     # Determine businesses from these users
@@ -323,24 +323,24 @@ def subsample_processed_data(percent=5):
     print(f"Subsampled businesses: {len(subsampled_businesses)}")
 
     # Subsample business data
-    business_file = os.path.join(DATA_PROCESSED, "business_processed.csv")
+    business_file = os.path.join(DATA_PROCESSED_PATH, "business_processed.csv")
     business_df = pd.read_csv(business_file)
     business_sub = business_df[business_df["business_id"].isin(subsampled_businesses)]
-    business_sub_file = os.path.join(TEST_DATA_PROCESSED, "business_processed.csv")
+    business_sub_file = os.path.join(TEST_DATA_PROCESSED_PATH, "business_processed.csv")
     business_sub.to_csv(business_sub_file, index=False)
 
     # Subsample user data
-    user_file = os.path.join(DATA_PROCESSED, "user_processed.csv")
+    user_file = os.path.join(DATA_PROCESSED_PATH, "user_processed.csv")
     user_df = pd.read_csv(user_file)
     user_sub = user_df[user_df["user_id"].isin(subset_users)]
-    user_sub_file = os.path.join(TEST_DATA_PROCESSED, "user_processed.csv")
+    user_sub_file = os.path.join(TEST_DATA_PROCESSED_PATH, "user_processed.csv")
     user_sub.to_csv(user_sub_file, index=False)
 
     # Subsample checkin data if exists
-    checkin_file = os.path.join(DATA_PROCESSED, "checkin_processed.csv")
+    checkin_file = os.path.join(DATA_PROCESSED_PATH, "checkin_processed.csv")
     checkin_df = pd.read_csv(checkin_file)
     checkin_sub = checkin_df[checkin_df["business_id"].isin(subsampled_businesses)]
-    checkin_sub_file = os.path.join(TEST_DATA_PROCESSED, "checkin_processed.csv")
+    checkin_sub_file = os.path.join(TEST_DATA_PROCESSED_PATH, "checkin_processed.csv")
     checkin_sub.to_csv(checkin_sub_file, index=False)
 
     print("Subsampled data files created in TEST_DATA_PROCESSED:")
@@ -349,6 +349,69 @@ def subsample_processed_data(percent=5):
     print(f" - Business: {business_sub_file}")
     print(f" - User: {user_sub_file}")
     print(f" - Checkins: {checkin_sub_file}")
+
+
+def preprocess_data(test_mode=False):
+    # Check and convert JSON files to CSV in data/raw/csv if needed
+    if not os.path.exists(os.path.join(DATA_RAW_CSV_PATH, "business.csv")):
+        print("Converting business JSON to CSV...")
+        convert_business_json_to_csv()
+    else:
+        print("Business CSV already exists. Skipping conversion.")
+
+    if not (os.path.exists(os.path.join(DATA_RAW_CSV_PATH, "reviews.csv")) and os.path.exists(
+            os.path.join(DATA_RAW_CSV_PATH, "ratings.csv"))):
+        print("Converting review JSON to CSV...")
+        convert_review_json_to_csv()
+    else:
+        print("Review and Ratings CSV already exist. Skipping conversion.")
+
+    if not os.path.exists(os.path.join(DATA_RAW_CSV_PATH, "user.csv")):
+        print("Converting user JSON to CSV...")
+        convert_user_json_to_csv()
+    else:
+        print("User CSV already exists. Skipping conversion.")
+
+    if not os.path.exists(os.path.join(DATA_RAW_CSV_PATH, "checkin.csv")):
+        print("Converting checkin JSON to CSV...")
+        convert_checkin_json_to_csv()
+    else:
+        print("Checkin CSV already exists. Skipping conversion.")
+
+    # Check and clean/process CSV files into data/processed if needed
+    if not os.path.exists(os.path.join(DATA_PROCESSED_PATH, "business_processed.csv")):
+        print("Cleaning and processing business data...")
+        preprocess_business()
+    else:
+        print("Processed business data already exists. Skipping cleaning.")
+
+    if not os.path.exists(os.path.join(DATA_PROCESSED_PATH, "reviews_processed.csv")):
+        print("Cleaning and processing reviews data...")
+        preprocess_reviews()
+    else:
+        print("Processed reviews data already exists. Skipping cleaning.")
+
+    if not os.path.exists(os.path.join(DATA_PROCESSED_PATH, "ratings_processed.csv")):
+        print("Cleaning and processing ratings data...")
+        preprocess_ratings()
+    else:
+        print("Processed ratings data already exists. Skipping cleaning.")
+
+    if not os.path.exists(os.path.join(DATA_PROCESSED_PATH, "user_processed.csv")):
+        print("Cleaning and processing user data...")
+        preprocess_user()
+    else:
+        print("Processed user data already exists. Skipping cleaning.")
+
+    if not os.path.exists(os.path.join(DATA_PROCESSED_PATH, "checkin_processed.csv")):
+        print("Cleaning and processing checkin data...")
+        preprocess_checkin()
+    else:
+        print("Processed checkin data already exists. Skipping cleaning.")
+
+    if test_mode:
+        print("Subsampling processed data to 5% for testing...")
+        subsample_processed_data(percent=5)
 
 
 ##############################################
@@ -362,63 +425,4 @@ if __name__ == "__main__":
                         help="Set to True to create test (5% subsample) files in TEST_DATA_PROCESSED folder")
     args = parser.parse_args()
 
-    # Check and convert JSON files to CSV in data/raw/csv if needed
-    if not os.path.exists(os.path.join(DATA_RAW_CSV, "business.csv")):
-        print("Converting business JSON to CSV...")
-        convert_business_json_to_csv()
-    else:
-        print("Business CSV already exists. Skipping conversion.")
-
-    if not (os.path.exists(os.path.join(DATA_RAW_CSV, "reviews.csv")) and os.path.exists(
-            os.path.join(DATA_RAW_CSV, "ratings.csv"))):
-        print("Converting review JSON to CSV...")
-        convert_review_json_to_csv()
-    else:
-        print("Review and Ratings CSV already exist. Skipping conversion.")
-
-    if not os.path.exists(os.path.join(DATA_RAW_CSV, "user.csv")):
-        print("Converting user JSON to CSV...")
-        convert_user_json_to_csv()
-    else:
-        print("User CSV already exists. Skipping conversion.")
-
-    if not os.path.exists(os.path.join(DATA_RAW_CSV, "checkin.csv")):
-        print("Converting checkin JSON to CSV...")
-        convert_checkin_json_to_csv()
-    else:
-        print("Checkin CSV already exists. Skipping conversion.")
-
-    # Check and clean/process CSV files into data/processed if needed
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "business_processed.csv")):
-        print("Cleaning and processing business data...")
-        preprocess_business()
-    else:
-        print("Processed business data already exists. Skipping cleaning.")
-
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "reviews_processed.csv")):
-        print("Cleaning and processing reviews data...")
-        preprocess_reviews()
-    else:
-        print("Processed reviews data already exists. Skipping cleaning.")
-
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "ratings_processed.csv")):
-        print("Cleaning and processing ratings data...")
-        preprocess_ratings()
-    else:
-        print("Processed ratings data already exists. Skipping cleaning.")
-
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "user_processed.csv")):
-        print("Cleaning and processing user data...")
-        preprocess_user()
-    else:
-        print("Processed user data already exists. Skipping cleaning.")
-
-    if not os.path.exists(os.path.join(DATA_PROCESSED, "checkin_processed.csv")):
-        print("Cleaning and processing checkin data...")
-        preprocess_checkin()
-    else:
-        print("Processed checkin data already exists. Skipping cleaning.")
-
-    if args.testing:
-        print("Subsampling processed data to 5% for testing...")
-        subsample_processed_data(percent=5)
+    preprocess_data(args.testing)

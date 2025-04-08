@@ -34,6 +34,7 @@ ml-s25-project/
 │   ├── level1_content_based.py
 │   ├── level2_cf.py
 │   ├── level3_matrix_factorization.py
+│   ├── level3dot1_matrix_factorization_with_pca.py
 │   ├── level4_hybrid.py [TBD]
 │   ├── level5_clustered.py [TBD]
 │   ├── level6_graph_based.py [TBD]
@@ -57,14 +58,17 @@ ml-s25-project/
 4. Prepare your data:
     - Place your Yelp data files in the `data/raw/json` directory
 5. Run the recommendation system:
-    - Content-based filtering
-        - `python -m src.main.py --method content --id [BUSINESS_ID] --top_n 5 --testing True`
+    - Content-based Filtering
+        - `python -m src.main --method content --id [BUSINESS_ID] --top_n 5 --testing True`
         - Replace `[BUSINESS_ID]` with the ID of the business you want to get recommendations for.
-    - Collaborative filtering
-        - `python -m src.main.py --method cf --id [USER_ID] --top_n 5 --testing True`
+    - Collaborative Filtering
+        - `python -m src.main --method cf --id [USER_ID] --top_n 5 --testing True`
         - Replace `[USER_ID]` with the ID of the user you want to get recommendations for.
-    - Matrix factorization
-        - `python -m src.main.py --method svd --id [USER_ID] --top_n 5 --testing True`
+    - Matrix Factorization
+        - `python -m src.main --method svd --id [USER_ID] --top_n 5 --testing True`
+        - Replace `[USER_ID]` with the ID of the user you want to get recommendations for.
+    - Matrix Factorization with PCA
+        - `python -m src.main --method svd-pca --id [USER_ID] --top_n 5 --variance_threshold 0.8 --testing True`
         - Replace `[USER_ID]` with the ID of the user you want to get recommendations for.
     - Common Parameters
         - `--method`: Method to use for recommendation (content, cf, svd, hybrid, clustered)
@@ -75,6 +79,8 @@ ml-s25-project/
             - For other methods, use user ID.
         - `--top_n`: Number of recommendations to return
             - Optional, default 5
+        - `--variance_threshold`: Threshold for Variance limit used for PCA
+            - Optional, default 0.8
         - `--testing`: Whether to run in testing mode (True/False)
             - Optional, default False
 
