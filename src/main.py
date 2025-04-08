@@ -12,6 +12,8 @@ import src.rec_sys_algos.level2_cf.level2dot1_cf as l2dot1
 # Import Level 3: Matrix Factorization functions
 import src.rec_sys_algos.level3_matrix_factorization.level3dot1_svd as l3dot1
 import src.rec_sys_algos.level3_matrix_factorization.level3dot2_svd_with_pca as l3dot2
+# Import Level 4: Hybrid Recommendation functions
+import src.rec_sys_algos.level4_hybrid.level4dot1_hybrid as l4dot1
 from src.common.data_preprocessing import preprocess_data
 from src.common.user_item_matrix_components import build_user_item_matrix_components
 from util.paths import DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
@@ -86,7 +88,7 @@ def run_content_based(user_id=None, top_n=5, method='tfidf'):
     profiles = l1.build_item_profiles(business_df, reviews_df)
     recommendations = l1.content_based_recommendations(user_id, ratings_df, profiles, top_n=top_n)
 
-    print_recommendations(user_id, recommendations)
+    return (user_id, recommendations)
 
 
 def run_collaborative(user_id=None, top_n=5, method='cf'):
@@ -108,7 +110,7 @@ def run_collaborative(user_id=None, top_n=5, method='cf'):
     print("Generating Collaborative Filtering recommendations...")
     recommendations = l2.cf_based_recommendations(user_id, matrix_components, top_n=top_n)
 
-    print_recommendations(user_id, recommendations)
+    return (user_id, recommendations)
 
 
 def run_matrix_factorization(user_id=None, top_n=5, n_factors=50, variance_threshold=0.8, method='svd'):
@@ -124,6 +126,7 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=50, variance_thres
         print(f"No user_id provided. Using default: {user_id}")
 
     l3 = l3dot1
+    svd_model_components = None
     if method == 'svd':
         l3 = l3dot1
         print("Generating Matrix Factorization (SVD) recommendations...")
@@ -136,18 +139,42 @@ def run_matrix_factorization(user_id=None, top_n=5, n_factors=50, variance_thres
     recommendations = l3.matrix_factorization_based_recommendations(user_id, matrix_components, svd_model_components,
                                                                     top_n=top_n)
 
-    print_recommendations(user_id, recommendations)
+    return (user_id, recommendations)
+
+
+def run_hybrid(user_id=None, top_n=5, n_factors=50, weights=(0.33, 0.33, 0.34)):
+    """Run Hybrid Recommendation System."""
+    ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
+
+    ratings_df = pd.read_csv(ratings_csv)
+
+    if user_id is None:
+        user_id = ratings_df['user_id'].iloc[0]
+        print(f"No user_id provided. Using default: {user_id}")
+
+    _, cb_recommendations = run_content_based(user_id, top_n=top_n)
+
+    _, cf_recommendations = run_collaborative(user_id, top_n=top_n)
+
+    _, mf_recommendations = run_matrix_factorization(user_id, top_n=top_n, n_factors=n_factors)
+
+    print("Generating Hybrid Recommendations...")
+    recommendations = l4dot1.hybrid_recommendations(cb_recommendations, cf_recommendations, mf_recommendations,
+                                                    top_n=top_n, weights=weights)
+
+    return (user_id, recommendations)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hybrid Yelp Recommendation System - Main Integration")
     parser.add_argument('--method', type=str, required=True,
                         choices=['content_tf_idf', 'content_sentence_transformer', 'content_lsa', 'cf', 'svd',
-                                 'svd_with_pca'],
+                                 'svd_with_pca', 'hybrid'],
                         help="Select the recommendation method: 'content_tf_idf' for TF-TDF powered Content-Based, \
                         'content_sentence_transformer' for Sentence Transformer powered Content-Based, \
                         'content_lsa' for LSA powered Content-Based, 'cf' for Collaborative Filtering, \
-                        'svd' for Matrix Factorization, 'svd_with_pca' for PCA-enhanced Matrix Factorization.")
+                        'svd' for Matrix Factorization, 'svd_with_pca' for PCA-enhanced Matrix Factorization, \
+                        'hybrid' for Hybrid Recommendations.")
     parser.add_argument('--id', type=str, required=False,
                         help="ID of the business (for content-based) or user (for cf/svd). Defaults to the first record if not provided.")
     parser.add_argument('--top_n', type=int, default=5,
@@ -169,17 +196,26 @@ if __name__ == "__main__":
     # Validate processed files
     run_preprocessing(args.testing)
 
+    recommendations_for_user = None
     # Execute the selected recommendation method
     if args.method == "content_tf_idf":
-        run_content_based(user_id=args.id, top_n=args.top_n, method='tf_idf')
+        recommendations_for_user = run_content_based(user_id=args.id, top_n=args.top_n, method='tf_idf')
     elif args.method == "content_sentence_transformer":
-        run_content_based(user_id=args.id, top_n=args.top_n, method='sentence_transformer')
+        recommendations_for_user = run_content_based(user_id=args.id, top_n=args.top_n, method='sentence_transformer')
     elif args.method == "content_lsa":
-        run_content_based(user_id=args.id, top_n=args.top_n, method='lsa')
+        recommendations_for_user = run_content_based(user_id=args.id, top_n=args.top_n, method='lsa')
     elif args.method == "cf":
-        run_collaborative(user_id=args.id, top_n=args.top_n, method='cf')
+        recommendations_for_user = run_collaborative(user_id=args.id, top_n=args.top_n, method='cf')
     elif args.method == "svd":
-        run_matrix_factorization(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors, method='svd')
+        recommendations_for_user = run_matrix_factorization(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors,
+                                                            method='svd')
     elif args.method == "svd_with_pca":
-        run_matrix_factorization(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors,
-                                 variance_threshold=args.variance_threshold, method='svd_with_pca')
+        recommendations_for_user = run_matrix_factorization(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors,
+                                                            variance_threshold=args.variance_threshold,
+                                                            method='svd_with_pca')
+    elif args.method == "hybrid":
+        recommendations_for_user = run_hybrid(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors)
+
+    user_id, recommendations = recommendations_for_user
+
+    print_recommendations(user_id, recommendations)
