@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from src.common.cache import cache_results
 from src.common.sentiment_analysis import batch_sentiment_analysis
 from src.common.text_embeddings import compute_embeddings
-from util.paths import DATA_PROCESSED
+from util.paths import DATA_PROCESSED_PATH
 
 
 @cache_results("item_profiles_cache.pkl", force_recompute=False)
@@ -95,24 +95,22 @@ def recommend_similar_businesses(business_id, item_profiles, top_n=5):
     # Get the feature vector for the target business
     target_vector = item_profiles[business_id].reshape(1, -1)
 
-    # Create array of all other business vectors
+    # Create array of all other business vectors and corresponding IDs
     other_business_ids = [bid for bid in business_ids if bid != business_id]
     other_vectors = np.array([item_profiles[bid] for bid in other_business_ids])
 
     # Compute similarity only between target and all others (not all-to-all)
     sim_scores = cosine_similarity(target_vector, other_vectors)[0]
+    sim_scores[idx] = 0  # Set similarity to zero for the target business itself
 
     # Get indices of top similar businesses
     top_indices = np.argsort(sim_scores)[::-1][:top_n]
-
-    # Return top business IDs
-    return [other_business_ids[i] for i in top_indices]
+    return [(other_business_ids[i], sim_scores[i]) for i in top_indices]
 
 
 if __name__ == "__main__":
-    # Load processed data using centralized paths
-    business_csv = os.path.join(DATA_PROCESSED, "business_processed.csv")
-    reviews_csv = os.path.join(DATA_PROCESSED, "reviews_processed.csv")
+    business_csv = os.path.join(DATA_PROCESSED_PATH, "business_processed.csv")
+    reviews_csv = os.path.join(DATA_PROCESSED_PATH, "reviews_processed.csv")
     business_df = pd.read_csv(business_csv)
     reviews_df = pd.read_csv(reviews_csv)
 
