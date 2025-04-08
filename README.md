@@ -59,24 +59,18 @@ ml-s25-project/
     - Place your Yelp data files in the `data/raw/json` directory
 5. Run the recommendation system:
     - Content-based Filtering
-        - `python -m src.main --method content --id [BUSINESS_ID] --top_n 5 --testing True`
-        - Replace `[BUSINESS_ID]` with the ID of the business you want to get recommendations for.
+        - `python -m src.main --method content --id [USER_ID] --top_n 5 --testing True`
     - Collaborative Filtering
         - `python -m src.main --method cf --id [USER_ID] --top_n 5 --testing True`
-        - Replace `[USER_ID]` with the ID of the user you want to get recommendations for.
     - Matrix Factorization
         - `python -m src.main --method svd --id [USER_ID] --top_n 5 --testing True`
-        - Replace `[USER_ID]` with the ID of the user you want to get recommendations for.
     - Matrix Factorization with PCA
         - `python -m src.main --method svd-pca --id [USER_ID] --top_n 5 --variance_threshold 0.8 --testing True`
-        - Replace `[USER_ID]` with the ID of the user you want to get recommendations for.
     - Common Parameters
         - `--method`: Method to use for recommendation (content, cf, svd, hybrid, clustered)
             - Mandatory
-        - `--id`: ID of the business/user to get recommendations for
+        - `--id`: ID of the user to get recommendations for
             - Optional, default 1st ID in the dataset
-            - For content-based filtering, use business ID.
-            - For other methods, use user ID.
         - `--top_n`: Number of recommendations to return
             - Optional, default 5
         - `--variance_threshold`: Threshold for Variance limit used for PCA

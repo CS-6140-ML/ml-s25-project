@@ -1,17 +1,17 @@
 import argparse
+import collections
 import os
 
 import pandas as pd
-from torch.nn.functional import threshold
 
 # Import Level 1: Content-Based Filtering functions
-import src.level1_content_based as l1
+import src.rec_sys_algos.level1_content.base as l1
 # Import Level 2: Collaborative Filtering functions
-import src.level2_cf as l2
+import src.rec_sys_algos.level2_cf.level2dot1_cf as l2
 # Import Level 3: Matrix Factorization functions
-import src.level3_matrix_factorization as l3
+import src.rec_sys_algos.level3_matrix_factorization.level3dot1_svd as l3
 # Import Level 3.1: Matrix Factorization with PCA functions
-import src.level3dot1_matrix_factorization_with_pca as l3dot1
+import src.rec_sys_algos.level3_matrix_factorization.level3dot2_svd_with_pca as l3dot1
 
 from src.common.data_preprocessing import preprocess_data
 from src.common.user_item_matrix_components import build_user_item_matrix_components
@@ -34,33 +34,66 @@ def run_preprocessing(test_mode=False):
         print("All processed files found. Skipping preprocessing.")
 
 
-def run_content_based(business_id=None, top_n=5):
-    # Load preprocessed business metadata and reviews
+def run_content_based(user_id=None, top_n=5):
+    # Load preprocessed business metadata, reviews, and ratings
     business_csv = os.path.join(processed_data_path, "business_processed.csv")
     reviews_csv = os.path.join(processed_data_path, "reviews_processed.csv")
+    ratings_csv = os.path.join(processed_data_path, "ratings_processed.csv")
 
     business_df = pd.read_csv(business_csv)
     reviews_df = pd.read_csv(reviews_csv)
+    ratings_df = pd.read_csv(ratings_csv)
 
-    if business_id is None:
-        business_id = business_df['business_id'].iloc[0]
-        print(f"No business_id provided. Using default: {business_id}")
+    if user_id is None:
+        user_id = ratings_df['user_id'].iloc[0]
+        print(f"No user_id provided. Using default: {user_id}")
 
+    # Get the top 3 highest-rated restaurants for the user
+    user_ratings = ratings_df[ratings_df['user_id'] == user_id]
+    top_rated = user_ratings.sort_values(by='stars', ascending=False).head(3)
+
+    if top_rated.empty:
+        print(f"No ratings found for user {user_id}.")
+        return []
+
+    # Build item profiles
     print("Building item profiles using Content-Based Filtering...")
     profiles = l1.build_item_profiles(business_df, reviews_df)
-    recommendations = l1.recommend_similar_businesses(business_id, profiles, top_n=top_n)
 
-    # Get business names for better readability
+    # Get recommendations for each of the top 3 restaurants
+    all_recommendations = []
+    for _, row in top_rated.iterrows():
+        business_id = row['business_id']
+        recommendations = l1.recommend_similar_businesses(business_id, profiles, top_n=top_n)
+        all_recommendations.extend(recommendations)
+
+    # Combine recommendations using score-based ranking with count as a tiebreaker
+    recommendation_scores = collections.defaultdict(list)
+    for business_id, score in all_recommendations:
+        recommendation_scores[business_id].append(score)
+
+    # Calculate final scores and counts
+    final_scores = [
+        (business_id, sum(scores) / len(scores), len(scores))  # (business_id, avg_score, count)
+        for business_id, scores in recommendation_scores.items()
+    ]
+
+    # Sort by average score (descending), then by count (descending)
+    final_scores.sort(key=lambda x: (-x[1], -x[2]))
+
+    # Get user's name and business names for better readability
+    users_csv = os.path.join(processed_data_path, "user_processed.csv")
     business_csv = os.path.join(processed_data_path, "business_processed.csv")
+    user_df = pd.read_csv(users_csv)
     business_df = pd.read_csv(business_csv)
 
     # Get user's name
-    business_name = business_df[business_df['business_id'] == business_id]['name'].iloc[0] if not business_df[
-        business_df['business_id'] == business_id].empty else "Unknown"
+    user_name = user_df[user_df['user_id'] == user_id]['name'].iloc[0] if not user_df[
+        user_df['user_id'] == user_id].empty else "Unknown"
 
     # Get business names for recommendations
     business_names = []
-    for rec_business_id, score in recommendations:
+    for rec_business_id, score, _ in final_scores:
         business_name = business_df[business_df['business_id'] == rec_business_id]['name'].iloc[0] if not business_df[
             business_df['business_id'] == rec_business_id].empty else "Unknown"
         business_names.append(f"{business_name} (ID: {rec_business_id}. Score: {score})")

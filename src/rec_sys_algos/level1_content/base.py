@@ -50,7 +50,7 @@ def build_item_profiles(business_df, reviews_df):
 def aggregate_business_reviews(reviews_df):
     """Cache the aggregation of review texts per business."""
     return reviews_df.groupby('business_id')['review_text'].apply(
-        lambda texts: " ".join(texts)).reset_index()
+        lambda texts: "SEP".join(texts)).reset_index()
 
 
 @cache_results("business_sentiments_cache.pkl", force_recompute=False)
