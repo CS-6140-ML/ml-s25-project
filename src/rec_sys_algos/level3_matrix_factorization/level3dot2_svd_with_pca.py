@@ -51,7 +51,10 @@ def train_svd(sparse_matrix, n_factors=50, variance_threshold=0.8):
     n_components_kept = max_components
 
     below_threshold = cumulative_variance <= adjusted_threshold
-    if np.any(below_threshold):
+    if variance_threshold == 1.0:
+        # If threshold is 1.0, keep all components
+        pass
+    elif np.any(below_threshold):
         n_components_kept = np.sum(below_threshold)
     else:
         # If even 1 component exceeds threshold, use 1 component
