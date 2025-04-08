@@ -6,7 +6,7 @@ from src.common.user_item_matrix_components import build_user_item_matrix_compon
 from util.paths import DATA_PROCESSED_PATH
 
 
-def user_based_recommendations(user_id, matrix_components, top_n=5, num_similar=10):
+def cf_based_recommendations(user_id, matrix_components, top_n=5, num_similar=10):
     sparse_matrix, user_ids, business_ids = matrix_components
 
     try:
@@ -56,6 +56,6 @@ if __name__ == "__main__":
     sparse_matrix, user_ids, business_ids = matrix_components
 
     sample_user_id = user_ids[0]
-    recommendations = user_based_recommendations(sample_user_id, matrix_components, top_n=5)
+    recommendations = cf_based_recommendations(sample_user_id, matrix_components, top_n=5)
     print(f"Collaborative Filtering Recommendations for user {sample_user_id}:")
     print(recommendations)

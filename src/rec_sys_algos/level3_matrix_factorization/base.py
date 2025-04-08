@@ -1,7 +1,40 @@
 import numpy as np
+from sklearn.decomposition import TruncatedSVD
+
+from src.common.cache import cache_results
 
 
-def matrix_factorization_recommendations(user_id, matrix_components, svd_model_components, top_n=5):
+@cache_results("svd_model_base_cache.pkl", force_recompute=False)
+def train_base_svd(sparse_matrix, n_factors=50):
+    """
+    Train SVD on the centered sparse user-item matrix.
+    """
+    # Calculate mean ratings for each user
+    row_means = np.zeros(sparse_matrix.shape[0])
+    for i in range(sparse_matrix.shape[0]):
+        row = sparse_matrix[i]
+        if row.nnz > 0:  # If user has any ratings
+            row_means[i] = row.sum() / row.nnz
+
+    # Center the matrix by subtracting the row means
+    centered_matrix = sparse_matrix.tolil()
+
+    for i in range(sparse_matrix.shape[0]):
+        if row_means[i] != 0:
+            rows, cols = centered_matrix[i].nonzero()
+            for j in cols:
+                centered_matrix[i, j] -= row_means[i]
+    centered_matrix = centered_matrix.tocsr()
+
+    # Perform SVD
+    svd = TruncatedSVD(n_components=n_factors, random_state=42)
+    U = svd.fit_transform(centered_matrix)
+    Vt = svd.components_
+
+    return svd, U, Vt, row_means
+
+
+def matrix_factorization_based_recommendations(user_id, matrix_components, svd_model_components, top_n=5):
     """
     Recommend items for a given user using the SVD model.
 
