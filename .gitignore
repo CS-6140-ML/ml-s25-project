@@ -67,3 +67,19 @@ venv.bak/
 # System files
 .DS_Store
 Thumbs.db
+
+
+data/processed/
+data/raw/csv/business.csv
+data/raw/csv/checkin.csv
+data/raw/csv/ratings.csv
+data/raw/csv/reviews.csv
+data/raw/csv/user.csv
+data/raw/json/yelp_academic_dataset_business.json
+data/raw/json/yelp_academic_dataset_checkin.json
+data/raw/json/yelp_academic_dataset_review.json
+data/raw/json/yelp_academic_dataset_user.json
+knn_output.log
+data/cache/kmeans_features_cache.pkl
+data/cache/kmeans_model_cache.pkl
+data/cache/elbow_method_results.pkl
