@@ -1,0 +1,32 @@
+Starting KNN clustering recommendation system...
+Current working directory: /CS6140-ml-project/ml-s25-project
+Loading data from: /data/processed
+Business data loaded, shape: (11537, 10)
+Reviews data loaded, shape: (229901, 4)
+Ratings data loaded, shape: (229907, 3)
+
+Business columns: ['business_id', 'name', 'city', 'state', 'stars', 'review_count', 'categories', 'latitude', 'longitude', 'categories_list']
+Ratings columns: ['user_id', 'business_id', 'rating']
+Data loaded successfully
+User-item matrix built
+Extracting features...
+Feature columns before preparation: ['business_id', 'stars', 'review_count', 'avg_user_rating', 'user_rating_count', 'rating_std']
+Sample of numeric values:
+    stars  review_count  avg_user_rating  user_rating_count  rating_std
+0    5.0             3         5.000000                  3    0.000000
+1    5.0             5         5.000000                  4    0.000000
+2    5.0             4         5.000000                  4    0.000000
+3    3.5             5         3.400000                  5    0.547723
+4    3.5            14         3.714286                 14    1.325987
+Features extracted
+Loading cached results for prepare_features
+Features prepared: stars, review_count, avg_user_rating, user_rating_count, rating_std
+Loading cached results for train_kmeans
+KMeans model trained with 8 clusters
+
+Cluster-based Recommendations for user rLtl8ZkDX5vH5nAx9C3q5Q:
+Business: UKgSs_SJzW9fu4CwhIV1yA, Score: 22.43
+Business: qw93CjlAZ6a4ff11Z-hF3Q, Score: 22.43
+Business: u0NbikWwP7TVkMkCily-4g, Score: 22.43
+Business: 5KG0A3WlC7K3DAXtrIFFjg, Score: 22.14
+Business: mQfT3JYu18HN22DVylcE7A, Score: 22.11
