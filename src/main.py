@@ -14,6 +14,9 @@ import src.rec_sys_algos.level3_matrix_factorization.level3dot1_svd as l3dot1
 import src.rec_sys_algos.level3_matrix_factorization.level3dot2_svd_with_pca as l3dot2
 # Import Level 4: Hybrid Recommendation functions
 import src.rec_sys_algos.level4_hybrid.level4dot1_hybrid as l4dot1
+# Import Level 5: KNN-based Recommendation functions
+import src.rec_sys_algos.level5_clustering.level5dot1_knn as l5dot1
+
 from src.common.data_preprocessing import preprocess_data
 from src.common.user_item_matrix_components import build_user_item_matrix_components
 from util.paths import DATA_PROCESSED_PATH, TEST_DATA_PROCESSED_PATH
@@ -165,18 +168,24 @@ def run_hybrid(user_id=None, top_n=5, n_factors=50, weights=(0.33, 0.33, 0.34)):
     return (user_id, recommendations)
 
 
+def run_clustering(user_id=None, top_n=5, n_neighbors=5):
+    """Run Clustering-based Recommendation System."""
+    recommendations = None
+    return (user_id, recommendations)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Hybrid Yelp Recommendation System - Main Integration")
     parser.add_argument('--method', type=str, required=True,
                         choices=['content_tf_idf', 'content_sentence_transformer', 'content_lsa', 'cf', 'svd',
-                                 'svd_with_pca', 'hybrid'],
+                                 'svd_with_pca', 'hybrid', 'clustering'],
                         help="Select the recommendation method: 'content_tf_idf' for TF-TDF powered Content-Based, \
                         'content_sentence_transformer' for Sentence Transformer powered Content-Based, \
                         'content_lsa' for LSA powered Content-Based, 'cf' for Collaborative Filtering, \
                         'svd' for Matrix Factorization, 'svd_with_pca' for PCA-enhanced Matrix Factorization, \
-                        'hybrid' for Hybrid Recommendations.")
+                        'hybrid' for Hybrid Recommendations, 'clustering' for Clustering-based Recommendations.")
     parser.add_argument('--id', type=str, required=False,
-                        help="ID of the business (for content-based) or user (for cf/svd). Defaults to the first record if not provided.")
+                        help="ID of the user. Defaults to the first record if not provided.")
     parser.add_argument('--top_n', type=int, default=5,
                         help="Number of recommendations to return (default is 5).")
     parser.add_argument('--n_factors', type=int, default=50,
@@ -215,6 +224,8 @@ if __name__ == "__main__":
                                                             method='svd_with_pca')
     elif args.method == "hybrid":
         recommendations_for_user = run_hybrid(user_id=args.id, top_n=args.top_n, n_factors=args.n_factors)
+    elif args.method == "clustering":
+        recommendations_for_user = run_clustering(user_id=args.id, top_n=args.top_n, n_neighbors=args.n_neighbors)
 
     user_id, recommendations = recommendations_for_user
 
